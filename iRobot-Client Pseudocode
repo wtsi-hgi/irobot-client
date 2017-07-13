@@ -1,0 +1,59 @@
+Program - Design
+----------------
+
+Get input and output arguments from the command line
+
+Parse the arguments
+
+Check that the CRAM and CRAI files exist at the /location/of/the/input/file
+    If not
+        Exit request and print error to user (stacktrace to log file?)
+
+
+    Check that whether the output file exists
+        If it does, ask the user if they want to overwrite it?
+            If the user doesn't
+                Ask the user for a new name or append a number to the end of the filename
+            Check if the new name exists
+        If the user does
+            Rewrite the file
+
+Send HTTP request for CRAM file
+    Listen for response
+    Handle response
+        If wait code
+            Wait and then pole again (send a new request??)
+        If duplicate MD5Sum
+            Tell the user then exist
+        If error code
+            Tell user and exit (log error?)
+        If download complete
+            Inform user (log?)
+
+Send HTTP request for CRAI file
+    Listen for response
+    Handle response
+        If wait code
+            Wait and then pole again (send a new request??)
+        If duplicate MD5Sum
+            Tell the user then exist
+        If error code
+            Tell user and exit (log error?)
+        If download complete
+            Inform user (log?)
+
+Exit
+
+Structural - Design
+-------------------
+Function to get command line arguments and set global variables for file locations
+INPUT_FILE_LOCATION
+OUTPUT_FILE_LOCATION
+
+Function to check input files exist
+    Function to handle HTTP responses
+
+Function to check output files exist
+
+Function to request data
+    Function to handle HTTP wait responses
