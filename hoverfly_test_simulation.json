@@ -1,0 +1,60 @@
+{
+	"data":
+    {
+		"pairs": [
+			{
+				"response":
+                {
+					"status": 202,
+					"body": "Returning .cram file",
+					"encodedBody": false,
+					"headers":
+                    {
+					}
+				},
+                "request":
+                {
+                        "path":
+                        {
+                                "globMatch": "*.cram"
+                        },
+                        "scheme":
+                        {
+                                "exactMatch": "http"
+                        }
+                }
+            },
+            {
+				"response":
+                {
+					"status": 200,
+					"body": "Returning .crai file",
+					"encodedBody": false,
+					"headers":
+                    {
+					}
+				},
+                "request":
+                {
+                        "path":
+                        {
+                                "globMatch": "*.crai"
+                        },
+                        "scheme":
+                        {
+                                "exactMatch": "http"
+                        }
+                }
+            }],
+		"globalActions":
+        {
+			"delays": []
+		}
+	},
+	"meta":
+    {
+		"schemaVersion": "v2",
+		"hoverflyVersion": "v0.12.0",
+		"timeExported": "2017-07-13T16:45:09+01:00"
+	}
+}
