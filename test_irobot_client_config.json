@@ -1,0 +1,9 @@
+{
+  "arvados_token": "abc123",
+  "irobot_address": "http://localhost:8500/",
+  "file_extensions": [
+    {
+      "CRAM": ".cram",
+      "CRAI:": ".crai"
+    }]
+}
