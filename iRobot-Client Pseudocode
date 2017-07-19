@@ -1,7 +1,13 @@
 Program - Design
 ----------------
 
+
 Get input and output arguments from the command line
+
+If irobot URL and arvados token are supplied at command line
+    Get URL and token
+Else
+   Get values from environement varibales
 
 Parse the arguments
 

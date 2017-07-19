@@ -19,7 +19,7 @@ import argparse
 import string
 import os
 
-from irobotclient.client import Irobot_Client
+from irobotclient.client import IrobotClient
 
 
 def _get_command_line_agrs():
@@ -29,21 +29,27 @@ def _get_command_line_agrs():
     :return: args
     """
 
-    parser = argparse.ArgumentParser(description="Comand line interface for iRobot HTTP requests")
-    parser.add_argument("input", help="input file")
-    parser.add_argument("output", help="output file")
+    parser = argparse.ArgumentParser(prog="irobot-client",
+                                     formatter_class=argparse.RawTextHelpFormatter,
+                                     description="Comand line interface for iRobot HTTP requests",
+                                     usage="irobot-client [options] INPUT_FILE OUTPUT_FILE")
+    parser.add_argument("input_file", help="path and name of input file")
+    parser.add_argument("output_file", help="path and name of output file")
+    parser.add_argument("-u", "--url", help="URL scheme, domain and port for irobot. EXAMPLE: http://irobot:5000/")
+    parser.add_argument("-f", "--force", default=False, action="store_true",
+                        help="force overwrite output file if it already exists")
     args = parser.parse_args()
 
     print("From _get_command_line_args: ", args)
 
-    args = _check_input_file_argument(args)
-    args = _check_output_file_argument(args)
+    args.input_file = _check_input_file_argument(args.input_file)
+    args.output_file = _check_output_file_argument(args.output_file, args.force)
 
     print("After processing: ", args)
 
     return args
 
-def _check_input_file_argument(args):
+def _check_input_file_argument(arg):
     '''
     Strip leading slashes and file extensions for input argument
 
@@ -51,18 +57,18 @@ def _check_input_file_argument(args):
     :return: args
     '''
     # Remove leading slash from input
-    if args.input.startswith('\\') or args.input.startswith('/'):
-        args.input = args.input.lstrip('/\\')
+    if arg.startswith('\\') or arg.startswith('/'):
+        arg = arg.lstrip('/\\')
 
     # Remove file extensions
-    if args.input.find('.'):
-        arg_split = args.input.split('.')
-        args.input = arg_split[0]   # Keeps the leftmost side of the '.'
+    if arg.find('.'):
+        arg_split = arg.split('.')
+        arg = arg_split[0]   # Keeps the leftmost side of the '.'
 
-    return args
+    return arg
 
 
-def _check_output_file_argument(args):
+def _check_output_file_argument(arg, overwrite):
     '''
     Check that the output file exists, if not create one.  If the file already exists
     ask the user if they want to overwrite the file or specify a new one, else add an increment to the
@@ -70,18 +76,16 @@ def _check_output_file_argument(args):
 
     :return: n/a
     '''
-    if os.path.exists(args.output):
-        # TODO - handle output file argument
-        print("Ask user if they want to overwrite the file?")
-    else:
-        print("Output file doesn't exist")
+    if os.path.exists(arg) and not overwrite:
+        print("Output file already exists.  Use --force option to overwrite")
+        exit()
 
-    return args
+    return arg
 
 
 if __name__ == "__main__":
     args = _get_command_line_agrs()
-    irobot_client = Irobot_Client(args.input, args.output)
+    irobot_client = IrobotClient(args.input, args.output)
     irobot_client.run()
     exit(0)
 
