@@ -18,12 +18,17 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 import collections
 
-CRAM = {"data": ".cram", "index": {".crai"}}
-BAM = {"data": ".bam", "index": {".bai", ".pbi"}}
+CRAM = {"data": ".cram", "index": ".crai"}
+BAM = {"data": ".bam", "index": ".bai" and ".pbi"}
 
 class Interface:
 
     def __init__(self, command_line_args):
+        """
+        Initiate the class variables with command or environment values.
+
+        :param command_line_args:
+        """
 
         self._input_file = self._remove_file_extension(command_line_args.input_file)
         self._output_file = command_line_args.output_file
@@ -51,6 +56,7 @@ class Interface:
 
     def _get_file_extensions(self, input_file, no_index=False):
         """
+        Assesses the file extension on the input file and returns a list of associate file to download.
 
         :param input_file:
         :return: associated file extensions for the type of
@@ -80,13 +86,11 @@ class Interface:
                 print(("ERROR: Unknown input file extension"))
                 exit()
 
-        print(file_extensions) # Beth - debug
-
         return file_extensions
 
     def _remove_file_extension(self, input_file):
         """
-        Remove the file extension so requests for different files types is easier to process
+        Remove the file extension and returns just the name of the file.
 
         :param input_file:
         :return: file name without the extension
