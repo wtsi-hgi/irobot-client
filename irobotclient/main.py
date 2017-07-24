@@ -15,21 +15,26 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+from irobotclient import configuration_handler
+
+
+def _print_error_details(error: OSError):
+    print("Inside _output_error_details")
+    print(error)
+    exit(error.errno)
+
 if __name__ == "__main__":
 
     try:
+
         # Set configurations from command line and/or environment.
+        configuration_handler.run()
+
         # Set a list of files that are going to be called.
         # Send HTTP request.
         # Handle responses.
         exit()
-    except NotADirectoryError as err:
-        print(f'ERROR: {err.}')
-        exit(err.strerror)
-    except:
-        print("Unknown error: please talk to your system administrator."
-              "Just kidding; they have no idea what's going on either.")
-
-
-
-
+    except OSError as err:
+        _print_error_details(err)
+    except Exception as err:
+        print(err)

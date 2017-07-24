@@ -1,6 +1,10 @@
 import argparse
 import string
+import re
 import os
+import errno
+
+from irobotclient.custom_exceptions import IrobotClientFileExistsError
 
 
 def _get_command_line_agrs():
@@ -24,10 +28,7 @@ def _get_command_line_agrs():
                                                                                "CRAM/BAM files")
     args = parser.parse_args()
 
-    _check_input_file_argument(args)
-    _check_output_directory_argument(args)
-
-    print("After processing: ", args) # Beth - debug
+    print(f'_get_command_line_args() args: {args}')
 
     return args
 
@@ -51,8 +52,8 @@ def _check_input_file_argument(args):
     :param args: the command line arguments
     """
 
-    if args.input_file.startswith('\\'):
-        args.input_file = args.input_file.lstrip('\\')
+    if args.input_file.startswith('/'):
+        args.input_file = args.input_file.lstrip('/')
 
 
 def _check_output_directory_argument(args):
@@ -64,9 +65,18 @@ def _check_output_directory_argument(args):
     """
 
     try:
-        # TODO - Check whether output directory, its contents, overwrite flag, etc
-        print("Do stuff")
-    except NotADirectoryError as error:
+        # Expand the output_dir argument so the full directory path can be used in the rest of the program.
+        args.output_dir = os.path.expanduser(args.output_dir)
+
+        for file in os.listdir(args.output_dir):
+
+            # Basic match; will return true if the file begins with the input_file string.
+            # TODO - Improve regex on checking whether input file already exists.
+            if re.match(file, args.input_file) and not args.force:
+                raise IrobotClientFileExistsError(errno=errno.EEXIST, message="File already exists. Please use the "
+                                                                              "--force option to overwrite.")
+
+    except NotADirectoryError:
         raise
     except:
         raise
@@ -79,5 +89,7 @@ def run():
 
     args = _get_command_line_agrs()
     _validate_command_line_args(args)
+
+    print(f'Configuration complete: {args}')
 
     return args
