@@ -16,10 +16,19 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from irobotclient import configuration_handler
+from irobotclient.custom_exceptions import IrobotClientException
 
 
 def _print_error_details(error: OSError):
-    print("Inside _output_error_details")
+    """
+    Print the output of any errors raised.
+
+    Utilises the OSError exception class which the iRobot Client uses for custom exceptions too.
+
+    :param error:
+    :return:
+    """
+    print("Inside _output_error_details") # Beth - debug
     print(error)
     exit(error.errno)
 
@@ -28,13 +37,17 @@ if __name__ == "__main__":
     try:
 
         # Set configurations from command line and/or environment.
-        configuration_handler.run()
+        config_details = configuration_handler.run()
+        print(f'Configuration complete: {config_details}') # Beth - debug
 
         # Set a list of files that are going to be called.
         # Send HTTP request.
         # Handle responses.
         exit()
+    except IrobotClientException as err:
+        _print_error_details(err)
     except OSError as err:
         _print_error_details(err)
     except Exception as err:
         print(err)
+        exit(1)

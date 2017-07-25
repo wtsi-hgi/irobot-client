@@ -4,7 +4,7 @@ import re
 import os
 import errno
 
-from irobotclient.custom_exceptions import IrobotClientFileExistsError
+from irobotclient.custom_exceptions import IrobotClientException
 
 
 def _get_command_line_agrs():
@@ -28,20 +28,21 @@ def _get_command_line_agrs():
                                                                                "CRAM/BAM files")
     args = parser.parse_args()
 
-    print(f'_get_command_line_args() args: {args}')
+    print(f'_get_command_line_args() args: {args}') # Beth - debug
 
     return args
 
 def _validate_command_line_args(args):
     """
+    Ensures all the necessary details are set to form the requests.
 
     :param args:
     :return:
     """
     _check_input_file_argument(args)
     _check_output_directory_argument(args)
-
-    # TODO - Check URL (with trailing slash) and auth token; if not supplied on the command line then check environement
+    _check_url_argument(args)
+    _check_authorisation_token(args)
 
     return args
 
@@ -68,28 +69,75 @@ def _check_output_directory_argument(args):
         # Expand the output_dir argument so the full directory path can be used in the rest of the program.
         args.output_dir = os.path.expanduser(args.output_dir)
 
+        # Split up the path string.
+        head_tail = os.path.split(args.input_file)
+        name_extension = os.path.splitext(head_tail[1])
+
         for file in os.listdir(args.output_dir):
 
             # Basic match; will return true if the file begins with the input_file string.
             # TODO - Improve regex on checking whether input file already exists.
-            if re.match(file, args.input_file) and not args.force:
-                raise IrobotClientFileExistsError(errno=errno.EEXIST, message="File already exists. Please use the "
+            if re.match(file, name_extension[0]) and not args.force:
+                raise IrobotClientException(errno=errno.EEXIST, message="File already exists. Please use the "
                                                                               "--force option to overwrite.")
 
-    except NotADirectoryError:
+    except IrobotClientException:
+        raise
+    except OSError:
         raise
     except:
-        raise
+        raise Exception("UNKNOWN ERROR: Failed to validate the output directory.")
+
+
+def _check_url_argument(args):
+    """
+    Check if a url has been provided via command line or environment setting and check trailing slash.
+
+    :param args:
+    :return:
+    """
+
+    try:
+        if args.url is None:
+            args.url = os.environ['IROBOTURL']
+    except KeyError:
+        raise IrobotClientException(errno.ENOKEY, "Cannot set URL from command line argument or environment"
+                                                  " variable.")
+    except:
+        raise Exception("UNKNOWN ERROR: Failed to set the URL.")
+
+    if not args.url.endswith('/'):
+        args.url += '/'
+
+
+def _check_authorisation_token(args):
+    """
+    Check is the authorisation token has been set on the command line or environment variable.
+
+    :param args:
+    :return:
+    """
+
+    # TODO - Going to have to handle basic authorisation eventually which will involve a new interface/class.
+    try:
+        if args.token is None:
+            args.token = os.environ['ARVADOSTOKEN']
+    except KeyError:
+        raise IrobotClientException(errno.ENOKEY, "Cannot set authentication token from command line argument "
+                                                  "or environment variable.")
+    except:
+        raise Exception("UNKNOWN ERROR: Failed to set the authorisation token.")
+
 
 def run():
     """
+    Calls the functions to collect any command line arguments, set configuration details needed for the iRobot
+    requests, and return the argparse object to the request formatter.
 
     :return:
     """
 
     args = _get_command_line_agrs()
     _validate_command_line_args(args)
-
-    print(f'Configuration complete: {args}')
 
     return args
