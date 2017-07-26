@@ -16,6 +16,7 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from irobotclient import configuration_handler
+from irobotclient import request_formatter
 from irobotclient.custom_exceptions import IrobotClientException
 
 
@@ -40,9 +41,10 @@ if __name__ == "__main__":
         config_details = configuration_handler.run()
         print(f'Configuration complete: {config_details}') # Beth - debug
 
-        # Set a list of files that are going to be called.
-        # Send HTTP request.
-        # Handle responses.
+        # For each file extenstion
+            # GET request
+            # Handle responses
+
         exit()
     except IrobotClientException as err:
         _print_error_details(err)

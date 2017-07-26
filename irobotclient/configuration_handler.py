@@ -28,9 +28,10 @@ def _get_command_line_agrs():
                                                                                "CRAM/BAM files")
     args = parser.parse_args()
 
-    print(f'_get_command_line_args() args: {args}') # Beth - debug
+    print(f'_get_command_line_args() args: {args}')  # Beth - debug
 
     return args
+
 
 def _validate_command_line_args(args):
     """
@@ -44,7 +45,6 @@ def _validate_command_line_args(args):
     _check_url_argument(args)
     _check_authorisation_token(args)
 
-    return args
 
 def _check_input_file_argument(args):
     """
@@ -69,17 +69,16 @@ def _check_output_directory_argument(args):
         # Expand the output_dir argument so the full directory path can be used in the rest of the program.
         args.output_dir = os.path.expanduser(args.output_dir)
 
-        # Split up the path string.
-        head_tail = os.path.split(args.input_file)
-        name_extension = os.path.splitext(head_tail[1])
+        # Split up the path string to obtain just the file name without extensions and full path.
+        file_name = os.path.splitext((os.path.split(args.input_file))[1])[0]
 
-        for file in os.listdir(args.output_dir):
+        for dir_file in os.listdir(args.output_dir):
 
-            # Basic match; will return true if the file begins with the input_file string.
+            # Basic match; will return true if the directory file begins with the input_file string.
             # TODO - Improve regex on checking whether input file already exists.
-            if re.match(file, name_extension[0]) and not args.force:
+            if re.match(dir_file, file_name) and not args.force:
                 raise IrobotClientException(errno=errno.EEXIST, message="File already exists. Please use the "
-                                                                              "--force option to overwrite.")
+                                                                        "--force option to overwrite.")
 
     except IrobotClientException:
         raise

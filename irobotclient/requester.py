@@ -72,15 +72,13 @@ import requests
 #
 #     def run(self):
 #         self._check_input_files_exist()
-class IrobotClient:
+class Requester:
 
-    def __init__(self, requested_file, irobot_url, authentication_type, authentication_token):
+    def __init__(self, requested_url: str, headers: dict):
         """
 
-        :param requested_file:
-        :param irobot_url:
-        :param authentication_type:
-        :param authentication_token:
+        :param requested_url:
+        :param headers:
         """
 
         # TODO - Implement class
