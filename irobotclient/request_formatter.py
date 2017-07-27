@@ -23,17 +23,16 @@ EXT_MAPPING = {
 }
 
 
-def get_header(method: str, auth_type: str, auth_token: str) -> dict:
+def get_header(auth_type: str, auth_token: str) -> dict:
     """
     Set the request headers and return them as a dictionary.
 
-    :param method:
     :param auth_type:
     :param auth_token:
     :return:
     """
     headers = {
-        "method": {method},
+        "method": "HEAD",
         "authorization": f'{auth_type} {auth_token}'
     }
 

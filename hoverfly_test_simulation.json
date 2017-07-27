@@ -6,7 +6,7 @@
 				"response":
                 {
 					"status": 202,
-					"body": "Returning .cram file",
+					"body": "Waiting on cram file",
 					"encodedBody": false,
 					"headers":
                     {
@@ -27,8 +27,8 @@
             {
 				"response":
                 {
-					"status": 200,
-					"body": "Returning .crai file",
+					"status": 202,
+					"body": "Waiting on bai file",
 					"encodedBody": false,
 					"headers":
                     {
@@ -38,7 +38,59 @@
                 {
                         "path":
                         {
-                                "globMatch": "*.crai"
+                                "globMatch": "*.bam"
+                        },
+                        "scheme":
+                        {
+                                "exactMatch": "http"
+                        }
+                }
+            },
+            {
+				"response":
+                {
+					"status": 202,
+					"body": "Waiting on README",
+					"encodedBody": false,
+					"headers":
+                    {
+					}
+				},
+                "request":
+                {
+                        "method":
+                        {
+                                "exactMatch": "HEAD"
+                        },
+                        "path":
+                        {
+                                "globMatch": "*README"
+                        },
+                        "scheme":
+                        {
+                                "exactMatch": "http"
+                        }
+                }
+            },
+            {
+				"response":
+                {
+					"status": 200,
+					"body": "Delivered on README",
+					"encodedBody": false,
+					"headers":
+                    {
+					}
+				},
+                "request":
+                {
+                        "method":
+                        {
+                                "exactMatch": "GET"
+                        },
+                        "path":
+                        {
+                                "globMatch": "*README"
                         },
                         "scheme":
                         {

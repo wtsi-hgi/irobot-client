@@ -16,62 +16,11 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import requests
+import time
 
-# from irobotclient.interface import Interface
-#
-# SUCCESS_RESPONSE = 200
-# WAIT_RESPONSE = 202
-# MATCHED_RESPONSE = 304
-#
-# # Mapping request responses to function handlers.
-#
-#
-# class IrobotClient(Interface):
-#
-#
-#     def _check_input_files_exist(self):
-#         """
-#         If the input file exists the code goes on to get the data.
-#
-#         :return:
-#         """
-#
-#         url = self.irobot_url + self.input_file
-#
-#         request_headers = {'Authorization': self.arvados_token}
-#
-#         print(f'In client object: {self.file_extensions}')  # Beth - debug
-#
-#         for key, value in self.file_extensions.items():
-#             print(f'Requesting: {value}')
-#             head_response = requests.head(url + value, headers=request_headers)
-#             print(f'{head_response} with {url + value}')  # Beth: help with debugging
-#             self._handle_head_request_response(head_response)
-#
-#     def _handle_head_request_response(self, response: requests.Response):
-#         """
-#         Handle the response from the HEAD request on the input files.
-#
-#         :rtype: object
-#         :return:
-#         """
-#
-#         # TODO - handle responses
-#         if response.status_code == SUCCESS_RESPONSE:
-#             print("Success")
-#             return
-#         elif response.status_code == WAIT_RESPONSE:
-#             print("Wait")
-#             return
-#         elif response.status_code == MATCHED_RESPONSE:
-#             print("Already Downloaded")
-#             return
-#         else:
-#             print("Download Failed")
-#             exit()
-#
-#     def run(self):
-#         self._check_input_files_exist()
+from datetime import datetime
+
+
 class Requester:
 
     def __init__(self, requested_url: str, headers: dict):
@@ -81,6 +30,62 @@ class Requester:
         :param headers:
         """
 
-        # TODO - Implement class
-        print("Do stuff")
+        self.url = requested_url
+        self.headers = headers
+        self.response = requests.Response()
+        self.request_delay = 0
+
+    def handle_request(self):
+        """
+
+        :param method:
+        :return:
+        """
+
+        time.sleep(self.request_delay)
+
+        try:
+            self.response = requests.get(self.url, headers=self.headers)
+        except ConnectionError:
+            raise
+        except TimeoutError:
+            raise
+        except:
+            raise
+
+        self._process_response()
+
+        print(f'Exiting Requester.handle_request with response of: {self.response}')
+
+    def _process_response(self):
+        """
+
+        :return:
+        """
+
+        if self.response.status_code == 202:
+            self._set_request_delay()
+            self.handle_request()
+        else:
+            print("More to come")
+            # TODO - implement error handling and download stream to output
+
+        self.headers["method"] = "GET"
+
+    def _set_request_delay(self):
+        """
+
+        :return:
+        """
+
+        if self.response.headers.values() is "application/vnd.irobot.eta":
+            self.response.encoding = "ISO8601 UTC"
+
+            # Eg:  2017-09-25T12:34:56Z+00:00 +/- 123
+            stripped_response_eta = (self.response.text.split('Z'))[0]
+            response_time = datetime.strptime(stripped_response_eta, "%Y-%m-%dT%H:%M:%S")
+
+            self.request_delay = (response_time - datetime.now()).total_seconds()
+
+
 
