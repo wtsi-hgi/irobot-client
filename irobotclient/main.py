@@ -52,7 +52,7 @@ if __name__ == "__main__":
             # process output
         else:
             for ext in file_extensions:
-                print("TODO - file extensions")
+                print("TODO - file extensions") # Beth - debug
                 # request each file
 
         print("Exiting....")

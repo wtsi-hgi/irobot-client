@@ -32,8 +32,8 @@ def get_header(auth_type: str, auth_token: str) -> dict:
     :return:
     """
     headers = {
-        "method": "HEAD",
-        "authorization": f'{auth_type} {auth_token}'
+        "Method": "HEAD",
+        "Authorization": f'{auth_type} {auth_token}'
     }
 
     return headers

@@ -70,7 +70,7 @@ class Requester:
             print("More to come")
             # TODO - implement error handling and download stream to output
 
-        self.headers["method"] = "GET"
+        self.headers["Method"] = "GET"
 
     def _set_request_delay(self):
         """
