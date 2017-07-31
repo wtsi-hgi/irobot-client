@@ -15,10 +15,10 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-from irobotclient import configuration_handler
+from irobotclient import configuration_handler, response_handler
 from irobotclient import request_formatter
 from irobotclient.custom_exceptions import IrobotClientException
-from irobotclient.requester import Requester
+from irobotclient.request_handler import Requester
 
 
 def _print_error_details(error: OSError):
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         if not file_extensions:
             request_handler = Requester(url, headers)
             request_handler.handle_request()
-            # process output
+            response_handler.process_response(request_handler)
         else:
             for ext in file_extensions:
                 print("TODO - file extensions") # Beth - debug

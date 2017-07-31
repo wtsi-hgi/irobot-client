@@ -1,5 +1,7 @@
 import unittest
 
+from irobotclient.request_handler import Requester
+
 # class _MockRequest(unittest.TestCase):
 #     """
 #
@@ -18,7 +20,7 @@ import unittest
 #     # Test wait response
 #         # request a cram or bam file
 #         # return 202 response for cram or bam
-#         # recieve delayed request
+#         # receive delayed request
 #         # return 200 response
 #
 #     # Test file with no extension specified
@@ -30,6 +32,13 @@ import unittest
 # # Test inputs?
 
 # Start simple
+
+
+class Test202Response(unittest.TestCase):
+    def runTest(self):
+        mock_request_handler = Requester("test", {"test": "test"})
+        mock_request_handler.response.status_code = 202
+        mock_request_handler._make_request()
 
 
 
