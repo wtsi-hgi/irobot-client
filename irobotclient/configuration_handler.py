@@ -111,21 +111,14 @@ def _check_url_argument(args):
 
 def _check_authorisation_token(args):
     """
-    Check is the authorisation token has been set on the command line or environment variable.
+    Check if the authorisation token has been set on the command line or environment variable.  If no
 
     :param args:
     :return:
     """
 
-    # TODO - Going to have to handle basic authorisation eventually which will involve a new interface/class.
-    try:
-        if args.token is None:
-            args.token = os.environ['ARVADOSTOKEN']
-    except KeyError:
-        raise IrobotClientException(errno.ENOKEY, "Cannot set authentication token from command line argument "
-                                                  "or environment variable.")
-    except:
-        raise Exception("UNKNOWN ERROR: Failed to set the authorisation token.")
+    if args.token is None:
+        args.token = os.environ['ARVADOSTOKEN']
 
 
 def run():

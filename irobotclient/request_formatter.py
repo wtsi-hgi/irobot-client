@@ -23,7 +23,7 @@ EXT_MAPPING = {
 }
 
 
-def get_header(auth_type: str, auth_token: str) -> dict:
+def get_header(auth_token: str) -> dict:
     """
     Set the request headers and return them as a dictionary.
 
@@ -31,10 +31,14 @@ def get_header(auth_type: str, auth_token: str) -> dict:
     :param auth_token:
     :return:
     """
-    headers = {
-        "Method": "HEAD",
-        "Authorization": f'{auth_type} {auth_token}'
-    }
+
+    headers = {}
+
+    # If an authorisation token has been supplied then it is likely Arvados authentication.
+    # Basic authorisation will be attempted after an unsuccessful request when the response specifies what
+    # authenitcation type it is expecting.
+    if auth_token is not None:
+        headers["Authorization"] = f'Arvados {auth_token}'
 
     return headers
 

@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-from irobotclient import configuration_handler, response_handler
+from irobotclient import configuration_handler
 from irobotclient import request_formatter
 from irobotclient.custom_exceptions import IrobotClientException
 from irobotclient.request_handler import Requester
@@ -44,16 +44,15 @@ if __name__ == "__main__":
 
         file_extensions = request_formatter.get_file_extensions(config_details.input_file, config_details.force)
         url = request_formatter.get_url_request_path(config_details.url, config_details.input_file)
-        headers = request_formatter.get_header(config_details.token, "Arvados")
+        headers = request_formatter.get_header(config_details.token)
 
         if not file_extensions:
             request_handler = Requester(url, headers)
-            request_handler.handle_request()
-            response_handler.process_response(request_handler)
+            data = request_handler.get_data()
         else:
             for ext in file_extensions:
                 print("TODO - file extensions") # Beth - debug
-                # request each file
+                # TODO - request each file
 
         print("Exiting....")
         exit()

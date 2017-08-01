@@ -1,5 +1,9 @@
 import unittest
+from unittest.mock import MagicMock
 
+import requests
+
+from irobotclient.custom_exceptions import IrobotClientException
 from irobotclient.request_handler import Requester
 
 # class _MockRequest(unittest.TestCase):
@@ -34,11 +38,20 @@ from irobotclient.request_handler import Requester
 # Start simple
 
 
-class Test202Response(unittest.TestCase):
-    def runTest(self):
-        mock_request_handler = Requester("test", {"test": "test"})
-        mock_request_handler.response.status_code = 202
-        mock_request_handler._make_request()
+class TestResponses(unittest.TestCase):
+    def setUp(self):
+        self.__old_request_head = requests.head
+        self._response = MagicMock(spec=requests.Response)
+        requests.head = MagicMock(spec=requests.head)
+
+    def tearDown(self):
+        requests.head = self.__old_request_head
+
+    def test_404_response(self):
+        self._response.return_value = requests.Response.status_code =[404]
+        test_requester = Requester("testURL", {"testKey": "testValue"})
+        self.assertRaises(IrobotClientException, test_requester.get_data())
+
 
 
 
