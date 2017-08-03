@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import requests
 import time
+import errno
 
 from datetime import datetime
 
@@ -13,45 +14,50 @@ from irobotclient.request_handler import Requester, RESPONSES
 class TestResponses(unittest.TestCase):
     def setUp(self):
         self._old_request_head = requests.head
-        self._old_request_get = requests.get
         self._response = requests.Response()
         requests.head = MagicMock(spec=requests.head)
-        requests.get = MagicMock(spec=requests.get)
-
-    def tearDown(self):
-        requests.head = self._old_request_head
-        requests.get = self._old_request_get
-
-    def test_202_response(self):
-        self._response.status_code = RESPONSES['FETCHING_DATA'].status_code
-        self._response.headers['iRobot-ETA'] = "2017-09-25T12:34:56Z+00:00 +/- 123"
         requests.head.return_value = self._response
+        self._test_requester = Requester("testURL", {"testKey": "testValue"})
 
-        old_time_sleep = time.sleep
+        self._old_time_sleep = time.sleep
         time.sleep = MagicMock(spec=time.sleep)
         time.sleep.return_value = None
 
-        old_datetime_now = datetime.now
-        datetime.now = MagicMock(spec=datetime.now)
-        datetime.now.return_Value = datetime(2017, 9, 25, 12, 30, 56) # 240 second until iRobot-ETA
+    def tearDown(self):
+        requests.head = self._old_request_head
+        time.sleep = self._old_time_sleep
 
-        test_requester = Requester("testURL", {"testKey": "testValue"})
+    def test_response_loop(self):
+        self._response.status_code = RESPONSES['FETCHING_DATA'].status_code
+
+        self.assertRaisesRegex(IrobotClientException, f"{errno.ECONNABORTED}",
+                               self._test_requester.get_data)
+
+    def test_200(self):
+        old_requests_get = requests.get
+        requests.get = MagicMock(spec=requests.get)
+        requests.get.return_value = 123
+
+        self._response.status_code = RESPONSES['SUCCESS'].status_code
+        self.assertEqual(self._test_requester.get_data(), 123)
+
+        requests.get = old_requests_get
+
+    def test_202(self):
+        self._response.status_code = RESPONSES['FETCHING_DATA'].status_code
+        self._response.headers['iRobot-ETA'] = "2017-09-25T12:34:56Z+00:00 +/- 123"
+
         try:
-            test_requester.get_data()
+            self._test_requester.get_data()
         except IrobotClientException:
-            self.assertEqual(test_requester._request_delay, 240)
+            self.assertEqual(self._test_requester._request_delay,
+                             int((datetime(2017, 9, 25, 12, 34, 56) - datetime.now()).total_seconds()))
 
-        time.sleep = old_time_sleep
-        datetime.now = old_datetime_now
-
-    def test_404_response(self):
+    def test_404(self):
         self._response.status_code = RESPONSES['NOT_FOUND'].status_code
-        requests.head.return_value = self._response
 
-        test_requester = Requester("testURL", {"testKey": "testValue"})
-        self.assertRaisesRegex(IrobotClientException, f"{RESPONSES['NOT_FOUND'].errno}", test_requester.get_data)
-
-
+        self.assertRaisesRegex(IrobotClientException, f"{RESPONSES['NOT_FOUND'].errno}",
+                               self._test_requester.get_data)
 
 
 if __name__ == '__main__':
