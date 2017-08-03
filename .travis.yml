@@ -12,6 +12,7 @@ install:
 
 script:
   - PYTHONPATH=. coverage run -m unittest discover -v -s irobotclient/test
+  - coverage combine
   - coverage report
 
 after_success:

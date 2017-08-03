@@ -1,5 +1,6 @@
 [run]
 branch = True
+cover_pylib = False
 source = .
 omit =
     irobotclient/test/*
