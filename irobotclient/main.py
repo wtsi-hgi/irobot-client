@@ -14,6 +14,8 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
+from os import path
+from requests import Response
 
 from irobotclient import configuration_handler
 from irobotclient import request_formatter
@@ -34,6 +36,22 @@ def _print_error_details(error: OSError):
     print(error)
     exit(error.errno)
 
+
+def _download_data(response: Response, output_dir:str):
+    """
+
+    :param response:
+    :param output_dir:
+    :return:
+    """
+    try:
+        file_name = (path.split(response.url))[1]
+        with open(f"{output_dir}{file_name}", "w") as file:
+            file = response.iter_content(chunk_size=None)
+    except:
+        response.close()
+        raise
+
 if __name__ == "__main__":
 
     try:
@@ -48,11 +66,13 @@ if __name__ == "__main__":
 
         if not file_extensions:
             request_handler = Requester(url, headers)
-            data = request_handler.get_data()
+            response = request_handler.get_data()
+            _download_data(response, config_details.output_dir)
         else:
             for ext in file_extensions:
-                print("TODO - file extensions") # Beth - debug
-                # TODO - request each file
+                request_handler = Requester(url + ext, headers)
+                response = request_handler.get_data()
+                _download_data(response, config_details.output_dir)
 
         print("Exiting....")
         exit()

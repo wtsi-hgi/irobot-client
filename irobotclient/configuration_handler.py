@@ -69,6 +69,10 @@ def _check_output_directory_argument(args):
         # Expand the output_dir argument so the full directory path can be used in the rest of the program.
         args.output_dir = os.path.expanduser(args.output_dir)
 
+        # Add a trailing slash to indicate directory.
+        if not args.output_dir.endswith('/'):
+            args.output_dir = args.output_dir + '/'
+
         # Split up the path string to obtain just the file name without extensions and full path.
         file_name = os.path.splitext((os.path.split(args.input_file))[1])[0]
 

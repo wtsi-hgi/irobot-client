@@ -4,11 +4,41 @@ from unittest.mock import MagicMock, patch
 import requests
 import time
 import errno
+import argparse
 
 from datetime import datetime, timedelta
 
+from irobotclient import configuration_handler
 from irobotclient.custom_exceptions import IrobotClientException
 from irobotclient.request_handler import Requester, RESPONSES, DEFAULT_REQUEST_DELAY
+
+
+class TestConfigurationSetup(unittest.TestCase):
+    def setUp(self):
+        self._old_argparser = argparse.ArgumentParser
+        argparse.ArgumentParser = MagicMock(spec=argparse.ArgumentParser)
+        self._parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+        self._parser.add_argument("input_file")
+        self._parser.add_argument("output_dir")
+        self._parser.add_argument("-u", "--url")
+        self._parser.add_argument("-t", "--token")
+        self._parser.add_argument("-f", "--force", default=False, action="store_true")
+        self._parser.add_argument("--no-index", default=False, action="store_true")
+
+        self._old_parse_args = argparse.ArgumentParser.parse_args
+        argparse.ArgumentParser.parse_args = MagicMock(spec=argparse.ArgumentParser.parse_args)
+
+    def tearDown(self):
+        argparse.ArgumentParser = self._old_argparser
+        argparse.ArgumentParser.parse_args = self._old_parse_args
+
+    @unittest.skip("TODO - Implement arg/config testing")
+    def test_input_file_arg(self):
+        #
+
+        config_details = configuration_handler.run()
+
+        pass
 
 
 class TestResponses(unittest.TestCase):
@@ -124,6 +154,11 @@ class TestResponses(unittest.TestCase):
 
         self.assertRaisesRegex(IrobotClientException, f"{RESPONSES['PRECACHE_FULL'].errno}",
                                self._test_requester.get_data)
+
+class TestDataDownload(unittest.TestCase):
+    pass
+    # TODO - Implement test for successful data download.
+
 
 if __name__ == '__main__':
     unittest.main()
