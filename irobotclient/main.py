@@ -60,7 +60,7 @@ if __name__ == "__main__":
         config_details = configuration_handler.run()
         print(f'Configuration complete: {config_details}') # Beth - debug
 
-        file_extensions = request_formatter.get_file_extensions(config_details.input_file, config_details.force)
+        file_extensions = request_formatter.get_file_extensions(config_details.input_file, config_details.no_index)
         url = request_formatter.get_url_request_path(config_details.url, config_details.input_file)
         headers = request_formatter.get_header(config_details.token)
 
