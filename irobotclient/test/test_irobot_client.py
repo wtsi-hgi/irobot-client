@@ -5,6 +5,7 @@ import requests
 import time
 import errno
 import argparse
+import os
 
 from datetime import datetime, timedelta
 
@@ -14,32 +15,49 @@ from irobotclient.request_handler import Requester, RESPONSES, DEFAULT_REQUEST_D
 
 
 class TestConfigurationSetup(unittest.TestCase):
+
     def setUp(self):
-        self._old_argparser = argparse.ArgumentParser
-        argparse.ArgumentParser = MagicMock(spec=argparse.ArgumentParser)
         self._parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-        self._parser.add_argument("input_file")
-        self._parser.add_argument("output_dir")
+        self._parser.add_argument("input_file", default="input")
+        self._parser.add_argument("output_dir", default="output")
         self._parser.add_argument("-u", "--url")
         self._parser.add_argument("-t", "--token")
         self._parser.add_argument("-f", "--force", default=False, action="store_true")
         self._parser.add_argument("--no-index", default=False, action="store_true")
 
-        self._old_parse_args = argparse.ArgumentParser.parse_args
-        argparse.ArgumentParser.parse_args = MagicMock(spec=argparse.ArgumentParser.parse_args)
+    def test_input_file_slash_removal(self):
+        args = self._parser.parse_args(["/some/place/on/irods/input.cram", None])
+        configuration_handler._check_input_file_argument(args)
+        self.assertFalse(args.input_file.startswith('/'))
 
-    def tearDown(self):
-        argparse.ArgumentParser = self._old_argparser
-        argparse.ArgumentParser.parse_args = self._old_parse_args
+    def test_output_directory_formatting(self):
+        old_listdir = os.listdir
+        os.listdir = MagicMock(spec=os.listdir)
+        os.listdir.return_value = []
 
-    @unittest.skip("TODO - Implement arg/config testing")
-    def test_input_file_arg(self):
-        #
+        args = self._parser.parse_args(["", "~/some/output/dir"])
+        configuration_handler._check_output_directory_argument(args)
+        self.assertTrue(os.path.isabs(args.output_dir))
+        self.assertTrue(args.output_dir.endswith('/'))
 
-        config_details = configuration_handler.run()
+        os.listdir = old_listdir
 
-        pass
+    def test_output_directory_not_exist(self):
+        args = self._parser.parse_args(["", "~/some/output/dir"])
+        configuration_handler._check_output_directory_argument(args)
+        self.assertRaisesRegex(OSError, "directory")
 
+    # Beth - This test fails but it raises the exception I am expecting.
+    def test_file_exist_in_output_dir_with_extension_and_no_overwrite(self):
+        old_listdir = os.listdir
+        os.listdir = MagicMock(spec=os.listdir)
+        os.listdir.return_value = {"hello", "test", "file", "one"}
+
+        args = self._parser.parse_args(["file.cram", "~/some/output/dir"])
+        configuration_handler._check_output_directory_argument(args)
+        self.assertRaisesRegex(IrobotClientException, f"{errno.EEXIST}")
+
+        os.listdir = old_listdir
 
 class TestResponses(unittest.TestCase):
     def setUp(self):
