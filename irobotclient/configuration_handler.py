@@ -24,7 +24,7 @@ def _get_command_line_agrs():
     parser.add_argument("-t", "--token", help="Arvados authentication token")
     parser.add_argument("-f", "--force", default=False, action="store_true", help="force overwrite output file if "
                                                                                   "it already exists")
-    parser.add_argument("--no-index", default=False, action="store_true", help="Do not download index files for"
+    parser.add_argument("--no_index", default=False, action="store_true", help="Do not download index files for"
                                                                                "CRAM/BAM files")
     args = parser.parse_args()
 
@@ -52,6 +52,9 @@ def _check_input_file_argument(args):
 
     :param args: the command line arguments
     """
+    if args.input_file.endswith('/') or os.path.isdir(args.input_file):
+        raise IrobotClientException(errno=errno.ECONNABORTED,
+                                    message="Cannot download entire directories at present.")
 
     if args.input_file.startswith('/'):
         args.input_file = args.input_file.lstrip('/')
@@ -80,7 +83,7 @@ def _check_output_directory_argument(args):
 
             # Basic match; will return true if the directory file begins with the input_file string.
             # TODO - Improve regex on checking whether input file already exists.
-            if re.match(dir_file, file_name) and not args.force:
+            if re.match(os.path.splitext(dir_file)[0], file_name) and not args.force:
                 raise IrobotClientException(errno=errno.EEXIST, message="File already exists. Please use the "
                                                                         "--force option to overwrite.")
 
