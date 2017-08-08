@@ -46,19 +46,17 @@ def _download_data(response: Response, output_dir:str):
     """
     try:
         file_name = (path.split(response.url))[1]
-        with open(f"{output_dir}{file_name}", "w") as file:
-            file = response.iter_content(chunk_size=None)
+        with open(f"{output_dir}{file_name}", "wb") as file:
+            file.write(bytes(response.content))
     except:
         response.close()
         raise
 
-if __name__ == "__main__":
-
+def _run():
     try:
 
         # Set configurations from command line and/or environment.
         config_details = configuration_handler.run()
-        print(f'Configuration complete: {config_details}') # Beth - debug
 
         file_extensions = request_formatter.get_file_extensions(config_details.input_file, config_details.no_index)
         url = request_formatter.get_url_request_path(config_details.url, config_details.input_file)
@@ -83,3 +81,8 @@ if __name__ == "__main__":
     except Exception as err:
         print(err)
         exit(1)
+
+
+if __name__ == "__main__":
+
+    _run()
