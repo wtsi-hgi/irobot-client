@@ -14,6 +14,8 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
+import errno
+
 from os import path
 from requests import Response
 
@@ -46,11 +48,17 @@ def _download_data(response: Response, output_dir:str):
     """
     try:
         file_name = (path.split(response.url))[1]
-        with open(f"{output_dir}{file_name}", "wb") as file:
-            file.write(bytes(response.content))
+
+        if response.headers["content-type"] == "application/octet-stream":
+            with open(f"{output_dir}{file_name}", "wb") as file:
+                file.write(bytes(response.content))
+        else:
+            with open(f"{output_dir}{file_name}", "w") as file:
+                file.write(response.content)
     except:
         response.close()
-        raise
+        raise IrobotClientException(errno=errno.ECONNABORTED, message="")
+
 
 def _run():
     try:
@@ -68,6 +76,7 @@ def _run():
             _download_data(response, config_details.output_dir)
         else:
             for ext in file_extensions:
+                # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
                 request_handler = Requester(url + ext, headers)
                 response = request_handler.get_data()
                 _download_data(response, config_details.output_dir)

@@ -38,7 +38,7 @@ def get_header(auth_token: str) -> dict:
     # Basic authorisation will be attempted after an unsuccessful request when the response specifies what
     # authenitcation type it is expecting.
     if auth_token is not None:
-        headers["Authorization"] = f'Arvados {auth_token}'
+        headers["authorization"] = f'Arvados {auth_token}'
 
     return headers
 
@@ -75,7 +75,7 @@ def get_file_extensions(input_file: str, no_index: bool) -> list:
         if no_index:
             return [extension]
         else:
-            return [extension, EXT_MAPPING[extension]]
+            return [extension, *EXT_MAPPING[extension]]
     else:
         return [extension]
 

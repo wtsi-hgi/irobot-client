@@ -129,7 +129,7 @@ class TestConfigurationSetup(unittest.TestCase):
 
     def test_auth_token_set_as_none(self):
         """
-        None, this shouldn't fail because the suthorisation method could be Basic type and this will be
+        Note: this shouldn't fail because the authorisation method could be Basic type and this will be
         handled at runtime.
 
         :return:
