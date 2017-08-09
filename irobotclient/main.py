@@ -55,9 +55,10 @@ def _download_data(response: Response, output_dir:str):
         else:
             with open(f"{output_dir}{file_name}", "w") as file:
                 file.write(response.content)
+    except OSError as err:
+        _print_error_details(err)
     except:
-        response.close()
-        raise IrobotClientException(errno=errno.ECONNABORTED, message="")
+        raise IrobotClientException(errno=errno.ECONNABORTED, message="Cannot write content to file.")
 
 
 def _run():
@@ -74,12 +75,14 @@ def _run():
             request_handler = Requester(url, headers)
             response = request_handler.get_data()
             _download_data(response, config_details.output_dir)
+            # TODO - checksum test if possible
         else:
             for ext in file_extensions:
                 # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
                 request_handler = Requester(url + ext, headers)
                 response = request_handler.get_data()
                 _download_data(response, config_details.output_dir)
+                # TODO - checksum test for each file if possible
 
         print("Exiting....")
         exit()

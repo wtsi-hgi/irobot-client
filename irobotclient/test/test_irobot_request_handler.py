@@ -83,6 +83,8 @@ class TestResponses(unittest.TestCase):
     def test_401(self):
         self._response.status_code = RESPONSES['AUTH_FAIL'].status_code
 
+        # Test alternative Basic authentication
+
     def test_403(self):
         self._response.status_code = RESPONSES['DENIED_IRODS'].status_code
 
