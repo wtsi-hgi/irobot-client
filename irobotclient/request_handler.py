@@ -86,8 +86,10 @@ class Requester:
 
                 response = requests.head(self._request)
 
+                print("self._request inside get_data() general: ", self._request.url)  # Beth - Debug
+
                 if response.status_code == RESPONSES['SUCCESS'].status_code:
-                    return requests.get(self._request_delay, stream=True)
+                    return requests.get(self._request, stream=True)
 
                 elif response.status_code == RESPONSES['FETCHING_DATA'].status_code:
                     self._request_delay = self._get_request_delay(response)

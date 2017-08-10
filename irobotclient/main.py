@@ -24,6 +24,8 @@ from irobotclient import request_formatter
 from irobotclient.custom_exceptions import IrobotClientException
 from irobotclient.request_handler import Requester
 
+# Limit for the size (in bytes) of data downloaded at a time.
+CHUNK_SIZE = 1024
 
 def _print_error_details(error: OSError):
     """
@@ -34,7 +36,7 @@ def _print_error_details(error: OSError):
     :param error:
     :return:
     """
-    print("Inside _output_error_details") # Beth - debug
+
     print(error)
     exit(error.errno)
 
@@ -49,12 +51,10 @@ def _download_data(response: Response, output_dir:str):
     try:
         file_name = (path.split(response.url))[1]
 
-        if response.headers["content-type"] == "application/octet-stream":
-            with open(f"{output_dir}{file_name}", "wb") as file:
-                file.write(bytes(response.content))
-        else:
-            with open(f"{output_dir}{file_name}", "w") as file:
-                file.write(response.content)
+        with open(f"{output_dir}{file_name}", "wb") as file:
+            for data_chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+                if data_chunk:
+                    file.write(bytes(data_chunk))
     except OSError as err:
         _print_error_details(err)
     except:
@@ -81,6 +81,9 @@ def _run():
                 # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
                 request_handler = Requester(url + ext, headers)
                 response = request_handler.get_data()
+
+                print(f"Response inside main.run(): {response}")  # Beth - debug
+
                 _download_data(response, config_details.output_dir)
                 # TODO - checksum test for each file if possible
 

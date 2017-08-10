@@ -45,8 +45,6 @@ def _get_command_line_agrs():
                                                                                "CRAM/BAM files")
     args = parser.parse_args()
 
-    print(f'_get_command_line_args() args: {args}')  # Beth - debug
-
     return args
 
 
