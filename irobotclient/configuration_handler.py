@@ -83,13 +83,14 @@ def _check_output_directory_argument(args):
 
     """
 
-    try:
-        # Expand the output_dir argument so the full directory path can be used in the rest of the program.
-        args.output_dir = os.path.expanduser(args.output_dir)
+    # Expand the output_dir argument so the full directory path can be used in the rest of the program.
+    args.output_dir = os.path.expanduser(args.output_dir)
 
-        # Add a trailing slash to indicate directory.
-        if not args.output_dir.endswith('/'):
-            args.output_dir = args.output_dir + '/'
+    # Add a trailing slash to indicate directory.
+    if not args.output_dir.endswith('/'):
+        args.output_dir = args.output_dir + '/'
+
+    try:
 
         # Split up the path string to obtain just the file name without extensions and full path.
         file_name = os.path.splitext((os.path.split(args.input_file))[1])[0]
@@ -107,7 +108,7 @@ def _check_output_directory_argument(args):
     except OSError:
         raise
     except:
-        raise Exception("UNKNOWN ERROR: Failed to validate the output directory.")
+        raise
 
 
 def _check_url_argument(args):
@@ -125,7 +126,7 @@ def _check_url_argument(args):
         raise IrobotClientException(errno.ENOKEY, "Cannot set URL from command line argument or environment"
                                                   " variable.")
     except:
-        raise Exception("UNKNOWN ERROR: Failed to set the URL.")
+        raise
 
     if not args.url.endswith('/'):
         args.url += '/'

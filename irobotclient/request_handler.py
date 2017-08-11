@@ -74,11 +74,13 @@ class Requester:
         self._request = requests.Request(url=requested_url, headers=headers)
         self._request_delay = 0
 
-    def get_data(self) -> requests.Response:
+    def get_data(self, file_extension="") -> requests.Response:
         """
 
         :return:
         """
+        self._request.url += file_extension
+
         try:
             for index in range(REQUEST_LIMIT):
 

@@ -27,6 +27,7 @@ from irobotclient.request_handler import Requester
 # Limit for the size (in bytes) of data downloaded at a time.
 CHUNK_SIZE = 1024
 
+
 def _print_error_details(error: OSError):
     """
     Print the output of any errors raised.
@@ -61,26 +62,17 @@ def _download_data(response: Response, output_dir:str):
         raise IrobotClientException(errno=errno.ECONNABORTED, message="Cannot write content to file.")
 
 
-def _run():
+def _run(request_handler: Requester, file_extensions: []):
     try:
 
-        # Set configurations from command line and/or environment.
-        config_details = configuration_handler.run()
-
-        file_extensions = request_formatter.get_file_extensions(config_details.input_file, config_details.no_index)
-        url = request_formatter.get_url_request_path(config_details.url, config_details.input_file)
-        headers = request_formatter.get_header(config_details.token)
-
         if not file_extensions:
-            request_handler = Requester(url, headers)
             response = request_handler.get_data()
             _download_data(response, config_details.output_dir)
             # TODO - checksum test if possible
         else:
             for ext in file_extensions:
                 # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
-                request_handler = Requester(url + ext, headers)
-                response = request_handler.get_data()
+                response = request_handler.get_data(ext)
 
                 print(f"Response inside main.run(): {response}")  # Beth - debug
 
@@ -88,7 +80,6 @@ def _run():
                 # TODO - checksum test for each file if possible
 
         print("Exiting....")
-        exit()
     except IrobotClientException as err:
         _print_error_details(err)
     except OSError as err:
@@ -100,4 +91,11 @@ def _run():
 
 if __name__ == "__main__":
 
-    _run()
+    # Set configurations from command line and/or environment.
+    config_details = configuration_handler.run()
+
+    url = request_formatter.get_url_request_path(config_details.url, config_details.input_file)
+    headers = request_formatter.get_header(config_details.token)
+    file_extensions = request_formatter.get_file_extensions(config_details.input_file, config_details.no_index)
+
+    _run(Requester(url, headers), file_extensions)
