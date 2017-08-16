@@ -21,10 +21,12 @@ import re
 import os
 import errno
 
+import sys
+
 from irobotclient.custom_exceptions import IrobotClientException
 
 
-def _get_command_line_agrs():
+def _get_command_line_args(args=None):
     """
     Get program arguments, calls validation methods, and returns the values in the argparse object.
 
@@ -43,7 +45,7 @@ def _get_command_line_agrs():
                                                                                   "it already exists")
     parser.add_argument("--no_index", default=False, action="store_true", help="Do not download index files for"
                                                                                "CRAM/BAM files")
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     return args
 
@@ -121,7 +123,7 @@ def _check_url_argument(args):
 
     try:
         if args.url is None:
-            args.url = os.environ['IROBOTURL']
+            args.url = os.environ['IROBOT_URL']
     except KeyError:
         raise IrobotClientException(errno.ENOKEY, "Cannot set URL from command line argument or environment"
                                                   " variable.")
@@ -141,10 +143,10 @@ def _check_authorisation_token(args):
     """
 
     if args.token is None:
-        args.token = os.environ['ARVADOSTOKEN']
+        args.token = os.environ['ARVADOS_TOKEN']
 
 
-def run():
+def run(config_args=None):
     """
     Calls the functions to collect any command line arguments, set configuration details needed for the iRobot
     requests, and return the argparse object to the request formatter.
@@ -152,7 +154,21 @@ def run():
     :return:
     """
 
-    args = _get_command_line_agrs()
+    args = _get_command_line_args(config_args)
     _validate_command_line_args(args)
 
     return args
+
+
+def get_default_request_delay() -> int:
+    """
+    If a 202 response returns with no iRobot-ETA header then a default delay (in seconds) will be set from the
+    environment or hardcoded in this function.
+
+    :return:
+    """
+
+    try:
+        return os.environ['IROBOT_REQUEST_DELAY_TIME']
+    except:
+        return 600

@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+
 class IrobotClientException(OSError):
     """
     Not all built-in exceptions return an error code.  Therefore this customer exception inherits the structure

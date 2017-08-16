@@ -21,18 +21,6 @@ class TestPipeline(unittest.TestCase):
         self._input_file_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'testdata/')
         self._output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'testdir/')
 
-        # Mocking an argparse to simulate the commandline args.
-        self._old_parse_args = argparse.ArgumentParser.parse_args
-        argparse.ArgumentParser.parse_args = MagicMock(spec=argparse.ArgumentParser.parse_args)
-        self._test_arg_parser = argparse.Namespace(input_file=self._input_file_dir,
-                                                   output_dir=self._output_dir,
-                                                   url="",
-                                                   token="abc123",
-                                                   force=True,
-                                                   no_index=False)
-
-        argparse.ArgumentParser.parse_args.return_value = self._test_arg_parser
-
         # Mocking requests.head() to return a default custom response without the need for middleware/server.
         self._old_request_head = requests.head
         requests.head = MagicMock(spec=requests.head)
@@ -52,7 +40,6 @@ class TestPipeline(unittest.TestCase):
         time.sleep.return_value = None
 
     def tearDown(self):
-        argparse.ArgumentParser.parse_args = self._old_parse_args
         requests.head = self._old_request_head
         requests.get = self._old_request_get
         time.sleep = self._old_time_sleep

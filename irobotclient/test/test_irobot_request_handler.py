@@ -7,8 +7,9 @@ import errno
 
 from datetime import datetime, timedelta
 
+from irobotclient import configuration_handler
 from irobotclient.custom_exceptions import IrobotClientException
-from irobotclient.request_handler import Requester, RESPONSES, DEFAULT_REQUEST_DELAY
+from irobotclient.request_handler import Requester, RESPONSES
 
 
 class TestResponses(unittest.TestCase):
@@ -60,7 +61,7 @@ class TestResponses(unittest.TestCase):
         try:
             self._test_requester.get_data()
         except IrobotClientException:
-            self.assertEqual(self._test_requester._request_delay, DEFAULT_REQUEST_DELAY)
+            self.assertEqual(self._test_requester._request_delay, configuration_handler.get_default_request_delay())
 
     @unittest.skip("206 to be implemented")
     def test_206(self):
@@ -126,6 +127,7 @@ class TestResponses(unittest.TestCase):
 
         self.assertRaisesRegex(IrobotClientException, f"{RESPONSES['PRECACHE_FULL'].errno}",
                                self._test_requester.get_data)
+
 
 class TestDataDownload(unittest.TestCase):
     pass

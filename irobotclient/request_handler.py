@@ -22,6 +22,7 @@ import errno
 from datetime import datetime
 from collections import namedtuple
 
+from irobotclient import configuration_handler
 from irobotclient.custom_exceptions import IrobotClientException
 
 """
@@ -36,11 +37,6 @@ Either way, the limit defined below helps prevent stack overflow and unnecessary
 is not going to work.
 """
 REQUEST_LIMIT = 10
-
-"""
-If a 202 response returns with not iRobot-ETA header then a default delay (in seconds) will be set.
-"""
-DEFAULT_REQUEST_DELAY = 600
 
 """
 The iRobot response status codes are declared below along with an associated standard error number if applicable.
@@ -88,7 +84,7 @@ class Requester:
 
                 response = requests.head(self._request)
 
-                print("self._request inside get_data() general: ", self._request.url)  # Beth - Debug
+                #print("self._request inside get_data() general: ", self._request.url)  # Beth - Debug
 
                 if response.status_code == RESPONSES['SUCCESS'].status_code:
                     return requests.get(self._request, stream=True)
@@ -162,4 +158,4 @@ class Requester:
             response_time = datetime.strptime(stripped_response_eta, "%Y-%m-%dT%H:%M:%S")
             return int((response_time - datetime.now()).total_seconds())
         else:
-            return DEFAULT_REQUEST_DELAY
+            return configuration_handler.get_default_request_delay()

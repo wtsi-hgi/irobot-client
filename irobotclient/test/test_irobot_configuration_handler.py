@@ -8,6 +8,7 @@ import os
 from irobotclient import configuration_handler
 from irobotclient.custom_exceptions import IrobotClientException
 
+
 class TestConfigurationSetup(unittest.TestCase):
 
     def setUp(self):
@@ -27,31 +28,23 @@ class TestConfigurationSetup(unittest.TestCase):
 
     def test_config_run(self):
         """
-        This test a complete run-through of configuration_handler.run() through getting args and validating them to
+        This test a complete run-through of configuration_handler.run(args) through getting args and validating them to
         return the correctly formatted details.
 
         :return:
         """
-        old_parse_args = argparse.ArgumentParser.parse_args
-        argparse.ArgumentParser.parse_args = MagicMock(spec=argparse.ArgumentParser.parse_args)
-        argparse.ArgumentParser.parse_args.return_value = argparse.Namespace(input_file="/input",
-                                                                             output_dir="output",
-                                                                             url="http://irobot/address",
-                                                                             token="abc123",
-                                                                             force=True,
-                                                                             no_index=True)
 
         os.listdir.return_value = ["hello", "input"]
 
-        self.assertEqual(configuration_handler.run(),
+        args = ['/input', 'output/', '-u', 'http://irobot/address', '-t', 'abc123', '-f', '--no_index']
+
+        self.assertEqual(configuration_handler.run(args),
                          argparse.Namespace(input_file="input",            # leading '/' removed
                                             output_dir="output/",          # trailing '/' added
                                             url="http://irobot/address/",  # trailing '/' added
                                             token="abc123",
                                             force=True,                    # overwrite "input" in output_dir
                                             no_index=True))                # don't download index files
-
-        argparse.ArgumentParser.parse_args = old_parse_args
 
     # The following test assess more granular details of the configuration handler.
     def test_input_file_slash_removal(self):
@@ -116,7 +109,7 @@ class TestConfigurationSetup(unittest.TestCase):
 
     def test_url_set_as_environ(self):
         args = self._parser.parse_args(["", "", "-u", None])
-        os.environ['IROBOTURL'] = "http://irobot/address/"
+        os.environ['IROBOT_URL'] = "http://irobot/address/"
 
         configuration_handler._check_url_argument(args)
         self.assertEqual(args.url, "http://irobot/address/")
@@ -147,7 +140,7 @@ class TestConfigurationSetup(unittest.TestCase):
 
     def test_arvados_token_set_as_environ(self):
         args = self._parser.parse_args(["", "", "-t", None])
-        os.environ['ARVADOSTOKEN'] = "abc123"
+        os.environ['ARVADOS_TOKEN'] = "abc123"
 
         configuration_handler._check_authorisation_token(args)
         self.assertTrue(args.token, "abc123")

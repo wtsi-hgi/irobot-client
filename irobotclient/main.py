@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import errno
-
+import sys
 from os import path
 from requests import Response
 
@@ -38,7 +38,7 @@ def _print_error_details(error: OSError):
     :return:
     """
 
-    print(error)
+    print(error, file=sys.stderr)
     exit(error.errno)
 
 
@@ -62,15 +62,15 @@ def _download_data(response: Response, output_dir:str):
         raise IrobotClientException(errno=errno.ECONNABORTED, message="Cannot write content to file.")
 
 
-def _run(request_handler: Requester, file_extensions: []):
+def _run(request_handler: Requester, file_exts: []):
     try:
 
-        if not file_extensions:
+        if not file_exts:
             response = request_handler.get_data()
             _download_data(response, config_details.output_dir)
             # TODO - checksum test if possible
         else:
-            for ext in file_extensions:
+            for ext in file_exts:
                 # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
                 response = request_handler.get_data(ext)
 
@@ -84,9 +84,6 @@ def _run(request_handler: Requester, file_extensions: []):
         _print_error_details(err)
     except OSError as err:
         _print_error_details(err)
-    except Exception as err:
-        print(err)
-        exit(1)
 
 
 if __name__ == "__main__":
