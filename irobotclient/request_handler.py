@@ -19,8 +19,8 @@ import requests
 import time
 import errno
 
-from datetime import datetime
-from collections import namedtuple
+from datetime import datetime, timezone
+from enum import Enum
 
 from irobotclient import configuration_handler
 from irobotclient.custom_exceptions import IrobotClientException
@@ -38,24 +38,33 @@ is not going to work.
 """
 REQUEST_LIMIT = 10
 
-"""
-The iRobot response status codes are declared below along with an associated standard error number if applicable.
-"""
-ResponseStruct = namedtuple("ResponseStruct", "status_code, errno")
+# An enumeration to name HTTP response status codes.
+class ResponseCodes(Enum):
+    SUCCESS = 200
+    FETCHING_DATA = 202
+    RANGED_DATA = 206
+    CLIENT_MATCHED = 304
+    AUTHENTICATION_FAILED = 401
+    DENIED_IRODS = 403
+    NOT_FOUND = 404
+    INVALID_REQUEST_METHOD = 405
+    INVALID_MEDIA_REQUESTED = 406
+    INVALID_RANGE = 416
+    TIMEOUT = 504
+    PRECACHE_FULL = 507
 
-RESPONSES = {
-    'SUCCESS': ResponseStruct(status_code=200, errno=None),
-    'FETCHING_DATA': ResponseStruct(status_code=202, errno=None),
-    'RANGED_DATA': ResponseStruct(status_code=206, errno=None),
-    'CLIENT_MATCHED': ResponseStruct(status_code=304, errno=None),
-    'AUTH_FAIL': ResponseStruct(status_code=401, errno=errno.ECONNREFUSED),
-    'DENIED_IRODS': ResponseStruct(status_code=403, errno=errno.EACCES),
-    'NOT_FOUND': ResponseStruct(status_code=404, errno=errno.ENODATA),
-    'INVALID_REQUEST_METHOD': ResponseStruct(status_code=405, errno=errno.EPROTO),
-    'INVALID_MEDIA_REQUESTED': ResponseStruct(status_code=406, errno=errno.EINVAL),
-    'INVALID_RANGE': ResponseStruct(status_code=416, errno=errno.ERANGE),
-    'TIMEOUT': ResponseStruct(status_code=504, errno=errno.ETIMEDOUT),
-    'PRECACHE_FULL': ResponseStruct(status_code=507, errno=errno.ENOMEM)
+# Set HTTP response error codes to an associated standard error number and custom message.
+error_table = {
+    ResponseCodes.AUTHENTICATION_FAILED: (errno.ECONNABORTED, "Authentication failed."),
+    ResponseCodes.DENIED_IRODS: (errno.EACCES, "Access to IRODs denied."),
+    ResponseCodes.NOT_FOUND: (errno.ENODATA, "The file requested cannot be found.  Please check the "
+                                             "path and name of the requested file."),
+    ResponseCodes.INVALID_REQUEST_METHOD: (errno.EPROTO, "Invalid HTTP request method."),
+    ResponseCodes.INVALID_MEDIA_REQUESTED: (errno.EINVAL, "Unsupported HTTP media type requested."),
+    ResponseCodes.INVALID_RANGE: (errno.ERANGE, "Invalid data range requested."),
+    ResponseCodes.TIMEOUT: (errno.ETIMEDOUT, "Connection timeout from iRobot."),
+    ResponseCodes.PRECACHE_FULL: (errno.ENOMEM, "Precache is full or too small for the size of the "
+                                                "requested file.")
 }
 
 
@@ -86,51 +95,20 @@ class Requester:
 
                 #print("self._request inside get_data() general: ", self._request.url)  # Beth - Debug
 
-                if response.status_code == RESPONSES['SUCCESS'].status_code:
+                if response.status_code == ResponseCodes.SUCCESS:
                     return requests.get(self._request, stream=True)
 
-                elif response.status_code == RESPONSES['FETCHING_DATA'].status_code:
+                elif response.status_code == ResponseCodes.FETCHING_DATA:
                     self._request_delay = self._get_request_delay(response)
 
-                elif response.status_code == RESPONSES['RANGED_DATA'].status_code:
+                elif response.status_code == ResponseCodes.RANGED_DATA:
                     pass  # TODO - This response could have a ETA of remaining data ranges
 
-                elif response.status_code == RESPONSES['CLIENT_MATCHED'].status_code:
+                elif response.status_code == ResponseCodes.CLIENT_MATCHED:
                     pass  # TODO - Client has already downloaded this data; need to add sum to request for this to work?
 
-                elif response.status_code == RESPONSES['AUTH_FAIL'].status_code:
-                    pass  # TODO - Check for response expected authorisation type; try basic auth.
-
-                elif response.status_code == RESPONSES['DENIED_IRODS'].status_code:
-                    raise IrobotClientException(errno=RESPONSES['DENIED_IRODS'].errno,
-                                                message="ERROR: Access to IRODs denied.")
-
-                elif response.status_code == RESPONSES['NOT_FOUND'].status_code:
-                    raise IrobotClientException(errno=RESPONSES['NOT_FOUND'].errno,
-                                                message="ERROR: The file requested cannot be found.  Please check the "
-                                                        "path and name of the requested file.")
-
-                elif response.status_code == RESPONSES['INVALID_REQUEST_METHOD'].status_code:
-                    raise IrobotClientException(errno=RESPONSES['INVALID_REQUEST_METHOD'].errno,
-                                                message="ERROR: Invalid HTTP request method; only GET, HEAD, POST, "
-                                                        "DELETE, and OPTIONS are supported.")
-
-                elif response.status_code == RESPONSES['INVALID_MEDIA_REQUESTED'].status_code:
-                    raise IrobotClientException(errno=RESPONSES['INVALID_MEDIA_REQUESTED'].errno,
-                                                message="ERROR: Unsupported HTTP media type requested.")
-
-                elif response.status_code == RESPONSES['INVALID_RANGE'].status_code:
-                    raise IrobotClientException(errno=RESPONSES['INVALID_RANGE'].errno,
-                                                message="ERROR: Invalid data range requested.")
-
-                elif response.status_code == RESPONSES['TIMEOUT'].status_code:
-                    raise IrobotClientException(errno=RESPONSES['TIMEOUT'].errno,
-                                                message="ERROR: Connection timeout from iRobot.")
-
-                elif response.status_code == RESPONSES['PRECACHE_FULL'].status_code:
-                    raise IrobotClientException(errno=RESPONSES['PRECACHE_FULL'].errno,
-                                                message="ERROR: Precache is full or too small for the size of the "
-                                                        "requested file.")
+                elif response.status_code in error_table.keys():
+                    raise IrobotClientException(*error_table[response.status_code])
 
                 continue
 
@@ -153,9 +131,9 @@ class Requester:
         """
 
         if "iRobot-ETA" in response.headers:
-            # Eg:  iRobot-ETA: 2017-09-25T12:34:56Z+00:00 +/- 123
-            stripped_response_eta = (response.headers["iRobot-ETA"].split('Z'))[0]
-            response_time = datetime.strptime(stripped_response_eta, "%Y-%m-%dT%H:%M:%S")
-            return int((response_time - datetime.now()).total_seconds())
+            # Eg:  iRobot-ETA: 2017-09-25T12:34:56Z+0000 +/- 123
+            stripped_response_eta = (response.headers["iRobot-ETA"].split(' '))[0]
+            response_time = datetime.strptime(stripped_response_eta, "%Y-%m-%dT%H:%M:%SZ%z")
+            return int((response_time - datetime.now(tz=timezone.utc)).total_seconds())
         else:
             return configuration_handler.get_default_request_delay()

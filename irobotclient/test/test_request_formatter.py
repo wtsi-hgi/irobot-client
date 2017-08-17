@@ -4,7 +4,9 @@ from irobotclient import request_formatter
 
 
 class TestRequestFormatter(unittest.TestCase):
-
+    """
+    Test case to check if the requests are formatted and built correctly.
+    """
     def test_get_authorisation_header_with_arvados(self):
         auth_token = "abc123"
 

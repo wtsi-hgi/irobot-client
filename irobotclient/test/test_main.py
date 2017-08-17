@@ -8,7 +8,9 @@ import irobotclient.main
 
 
 class TestMain(unittest.TestCase):
-
+    """
+    Test case for the main.py module.
+    """
     test_data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'testdata/')
     output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'testdir/')
 

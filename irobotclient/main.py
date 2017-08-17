@@ -62,7 +62,7 @@ def _download_data(response: Response, output_dir:str):
         raise IrobotClientException(errno=errno.ECONNABORTED, message="Cannot write content to file.")
 
 
-def _run(request_handler: Requester, file_exts: []):
+def _run(request_handler: Requester, file_exts=None):
     try:
 
         if not file_exts:
