@@ -11,8 +11,8 @@ class TestMain(unittest.TestCase):
     """
     Test case for the main.py module.
     """
-    test_data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'testdata/')
-    output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'testdir/')
+    test_data_dir = os.path.join(os.path.dirname(__file__), 'resources/testdata/')
+    output_dir = os.path.join(os.path.dirname(__file__), 'resources/testdir/')
 
     def setUp(self):
         self._old_request_head = requests.head

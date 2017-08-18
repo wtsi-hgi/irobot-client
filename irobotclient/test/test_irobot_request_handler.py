@@ -13,7 +13,7 @@ from irobotclient.custom_exceptions import IrobotClientException
 from irobotclient.request_handler import Requester, ResponseCodes, error_table
 
 
-class TestResponses(unittest.TestCase):
+class TestRequester(unittest.TestCase):
     """
     This test case assesses the functions of the request_handler.py code such as how various responses are
     dealt with and if the delay for the next request (if appropriate) is set correctly.

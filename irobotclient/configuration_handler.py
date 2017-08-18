@@ -36,10 +36,12 @@ def _get_command_line_args(args=None):
     parser = argparse.ArgumentParser(prog="irobot-client",
                                      formatter_class=argparse.RawTextHelpFormatter,
                                      description="Command line interface for iRobot HTTP requests",
-                                     usage="irobot-client [options] INPUT_FILE OUTPUT_FILE")
+                                     usage="irobot-client [options] INPUT_FILE OUTPUT_DIR")
     parser.add_argument("input_file", help="path and name of input file")
     parser.add_argument("output_dir", help="path of output directory")
-    parser.add_argument("-u", "--url", help="URL scheme, domain and port for irobot. EXAMPLE: http://irobot:5000/")
+    parser.add_argument("-u", "--url", help="Use this tag if no irobot URL is set as an environment variable "
+                                            "{IROBOT_URL}\nURL scheme, domain and port for irobot. "
+                                            "EXAMPLE: http://irobot:5000/")
     parser.add_argument("-t", "--token", help="Arvados authentication token")
     parser.add_argument("-f", "--force", default=False, action="store_true", help="force overwrite output file if "
                                                                                   "it already exists")
@@ -69,7 +71,7 @@ def _check_input_file_argument(args):
 
     :param args: the command line arguments
     """
-    if args.input_file.endswith('/') or os.path.isdir(args.input_file):
+    if args.input_file.endswith('/'):
         raise IrobotClientException(errno=errno.ECONNABORTED,
                                     message="Cannot download entire directories at present.")
 
@@ -93,15 +95,8 @@ def _check_output_directory_argument(args):
         args.output_dir = args.output_dir + '/'
 
     try:
-
-        # Split up the path string to obtain just the file name without extensions and full path.
-        file_name = os.path.splitext((os.path.split(args.input_file))[1])[0]
-
         for dir_file in os.listdir(args.output_dir):
-
-            # Basic match; will return true if the directory file begins with the input_file string.
-            # TODO - Improve regex on checking whether input file already exists.
-            if re.match(os.path.splitext(dir_file)[0], file_name) and not args.force:
+            if not args.force and args.input_file == dir_file:
                 raise IrobotClientException(errno=errno.EEXIST, message="File already exists. Please use the "
                                                                         "--force option to overwrite.")
 
@@ -136,7 +131,9 @@ def _check_url_argument(args):
 
 def _check_authorisation_token(args):
     """
-    Check if the authorisation token has been set on the command line or environment variable.  If no
+    Check if the authorisation token has been set on the command line or environment variable.  If no credentials are
+    supplied then the requester-request formatter will handle an 401 response to establish basic authentication if
+    possible.
 
     :param args:
     :return:
