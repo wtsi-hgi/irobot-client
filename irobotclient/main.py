@@ -92,7 +92,10 @@ if __name__ == "__main__":
     config_details = configuration_handler.run()
 
     url = request_formatter.get_url_request_path(config_details.url, config_details.input_file)
-    headers = request_formatter.get_header(config_details.token)
+    authentication_credentials = request_formatter.get_authentication_strings(config_details.arvados_token,
+                                                                              config_details.basic_username,
+                                                                              config_details.basic_password)
+    headers = request_formatter.get_headers()
     file_extensions = request_formatter.get_file_extensions(config_details.input_file, config_details.no_index)
 
-    _run(Requester(url, headers), file_extensions)
+    _run(Requester(url, authentication_credentials, headers), file_extensions)

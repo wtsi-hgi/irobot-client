@@ -69,12 +69,13 @@ error_table = {
 
 
 class Requester:
-    def __init__(self, requested_url: str, headers: dict):
+    def __init__(self, requested_url: str, authentication_credentials: dict, headers: dict):
         """
 
         :param requested_url:
-        :param headers:
+        :param authentication_credentials:
         """
+        headers['Authorization'] = self._set_authentication_header(requested_url, authentication_credentials)
 
         self._request = requests.Request(url=requested_url, headers=headers)
         self._request_delay = 0
@@ -137,3 +138,31 @@ class Requester:
             return int((response_time - datetime.now(tz=timezone.utc)).total_seconds())
         else:
             return configuration_handler.get_default_request_delay()
+
+    def _set_authentication_header(self, url: str, auth_credentials: dict) -> str:
+        """
+
+        :param response:
+        :return:
+        """
+        auth_response = requests.head(url + "/status")
+
+        try:
+            accepted_auth_types = auth_response.headers['WWW-Authenticate'].split(',')
+        except KeyError:
+            raise
+
+        for auth_type in accepted_auth_types:
+            if auth_type.strip() in auth_credentials.keys():
+                auth_string = f"{auth_type} {auth_credentials['auth_type']}"
+                response = requests.head(self._request.url + "/status", headers={'Authorization': auth_string})
+                if response.status_code == ResponseCodes.SUCCESS:
+                    return auth_string
+            else:
+                continue
+
+        return ""
+
+
+
+

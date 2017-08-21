@@ -1,5 +1,7 @@
 import unittest
 
+from requests.auth import HTTPBasicAuth
+
 from irobotclient import request_formatter
 
 
@@ -7,11 +9,18 @@ class TestRequestFormatter(unittest.TestCase):
     """
     Test case to check if the requests are formatted and built correctly.
     """
-    def test_get_authorisation_header_with_arvados(self):
+    def test_get_authorisation_strings(self):
         auth_token = "abc123"
+        username = "tester"
+        password = "password"
 
-        headers = request_formatter.get_header(auth_token=auth_token)
-        self.assertEqual(headers["authorization"], "Arvados abc123")
+        auth_strings = request_formatter.get_authentication_strings(arvados_token=auth_token,
+                                                               basic_username=username,
+                                                               basic_password=password)
+
+        basic_auth = HTTPBasicAuth(username, password)
+        self.assertEqual(auth_strings, {'Arvados': f"Arvados {auth_token}",
+                                        'Basic': f"Basic {basic_auth}"})
 
     def test_get_url_request_path(self):
         irobot_url = "http://test/address/"

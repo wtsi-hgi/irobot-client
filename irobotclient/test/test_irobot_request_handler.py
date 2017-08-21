@@ -22,8 +22,9 @@ class TestRequester(unittest.TestCase):
         self._old_request_head = requests.head
         self._response = requests.Response()
         requests.head = MagicMock(spec=requests.head)
+        self._response.headers['WWW-Authenticate'] = "Arvados, Basic"
         requests.head.return_value = self._response
-        self._test_requester = Requester("testURL", {"testKey": "testValue"})
+        self._test_requester = Requester("testURL", {"testAuth": "testPass"}, {"testKey": "testValue"})
 
         self._old_time_sleep = time.sleep
         time.sleep = MagicMock(spec=time.sleep)

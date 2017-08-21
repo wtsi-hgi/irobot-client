@@ -17,13 +17,13 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
 import string
-import re
 import os
 import errno
 
-import sys
-
 from irobotclient.custom_exceptions import IrobotClientException
+
+# Default response wait time.
+DEFAULT_WAIT_RESPONSE_TIME = 600
 
 
 def _get_command_line_args(args=None):
@@ -39,10 +39,22 @@ def _get_command_line_args(args=None):
                                      usage="irobot-client [options] INPUT_FILE OUTPUT_DIR")
     parser.add_argument("input_file", help="path and name of input file")
     parser.add_argument("output_dir", help="path of output directory")
-    parser.add_argument("-u", "--url", help="Use this tag if no irobot URL is set as an environment variable "
-                                            "{IROBOT_URL}\nURL scheme, domain and port for irobot. "
-                                            "EXAMPLE: http://irobot:5000/")
-    parser.add_argument("-t", "--token", help="Arvados authentication token")
+    parser.add_argument("-u", "--url",
+                        help="Use this tag if no irobot URL is set as an environment variable {IROBOT_URL}. "
+                             "URL scheme, domain and port for irobot. EXAMPLE: http://irobot:5000/",
+                        default=os.getenv('IROBOT_URL'))
+    parser.add_argument("--arvados_token",
+                        help="Arvados authentication token; if not supplied here it will be sourced from the "
+                             "environment {ARVADOS_TOKEN} or default to an",
+                        default=os.getenv('ARVADOS_TOKEN'))
+    parser.add_argument("--basic_username",
+                        help="Basic authentication username; if not supplied here it will be sourced from the "
+                             "environment {BASIC_USERNAME} then, failing that, current system user",
+                        default=os.getenv('BASIC_USERNAME', os.uname()))
+    parser.add_argument("--basic_password",
+                        help="Basic authentication password; if not supplied here it will be sourced from the "
+                             "environment {BASIC_PASSWORD}",
+                        default=os.getenv('BASIC_PASSWORD'))
     parser.add_argument("-f", "--force", default=False, action="store_true", help="force overwrite output file if "
                                                                                   "it already exists")
     parser.add_argument("--no_index", default=False, action="store_true", help="Do not download index files for"
@@ -62,7 +74,7 @@ def _validate_command_line_args(args):
     _check_input_file_argument(args)
     _check_output_directory_argument(args)
     _check_url_argument(args)
-    _check_authorisation_token(args)
+    _check_authorisation_credentials(args)
 
 
 def _check_input_file_argument(args):
@@ -115,32 +127,25 @@ def _check_url_argument(args):
     :param args:
     :return:
     """
-
-    try:
-        if args.url is None:
-            args.url = os.environ['IROBOT_URL']
-    except KeyError:
-        raise IrobotClientException(errno.ENOKEY, "Cannot set URL from command line argument or environment"
-                                                  " variable.")
-    except:
-        raise
+    if args.url is None:
+        raise IrobotClientException(errno=errno.EINVAL, message="No iRobot URL specified; please check input "
+                                                                "arguments and/or environment variables.")
 
     if not args.url.endswith('/'):
         args.url += '/'
 
 
-def _check_authorisation_token(args):
+def _check_authorisation_credentials(args):
     """
-    Check if the authorisation token has been set on the command line or environment variable.  If no credentials are
-    supplied then the requester-request formatter will handle an 401 response to establish basic authentication if
-    possible.
+    Check if the authorisation credentials have been set on the command line or environment variable.
+    If no credentials are supplied then the values will be obtained from the environment.
 
     :param args:
     :return:
     """
-
-    if args.token is None:
-        args.token = os.environ['ARVADOS_TOKEN']
+    if not args.arvados_token and not args.basic_password:
+        raise IrobotClientException(errno=errno.EACCES, message="No Arvados or Basic authentication set; please check "
+                                                                "input arguments and/or environment variables.")
 
 
 def run(config_args=None):
@@ -168,4 +173,4 @@ def get_default_request_delay() -> int:
     try:
         return os.environ['IROBOT_REQUEST_DELAY_TIME']
     except:
-        return 600
+        return DEFAULT_WAIT_RESPONSE_TIME

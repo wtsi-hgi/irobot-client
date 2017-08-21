@@ -14,7 +14,7 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
+from requests.auth import HTTPBasicAuth
 import os
 
 EXT_MAPPING = {
@@ -23,38 +23,48 @@ EXT_MAPPING = {
 }
 
 
-def get_header(auth_token: str) -> dict:
+def get_authentication_strings(arvados_token=None, basic_username=None, basic_password=None) -> dict:
     """
-    Set the request headers and return them as a dictionary.
+    Set the request authentication_credentials and return them as a dictionary.
 
     :param auth_type:
-    :param auth_token:
+    :param arvados_token:
     :return:
     """
 
-    headers = {}
+    authentication_credentials = {}
 
-    # If an authorisation token has been supplied then it is likely Arvados authentication.
-    # Basic authorisation will be attempted after an unsuccessful request when the response specifies what
-    # authenitcation type it is expecting.
-    if auth_token is not None:
-        headers["authorization"] = f'Arvados {auth_token}'
+    if arvados_token is not None:
+        authentication_credentials['Arvados'] = f'Arvados {arvados_token}'
 
-    return headers
+    if basic_password is not None:
+        base_password = HTTPBasicAuth(basic_username, basic_password)
+        authentication_credentials['Basic'] = f'Basic {base_password}'
+
+    return authentication_credentials
 
 
-def get_url_request_path(irobout_url: str, input_file: str) -> str:
+def get_headers() -> dict:
+    """
+
+    :return:
+    """
+    # TODO - support other headers
+    return {}
+
+
+def get_url_request_path(irobot_url: str, input_file: str) -> str:
     """
     Return the URL for the requested data without any file extensions if supplied.
 
-    :param irobout_url:
+    :param irobot_url:
     :param input_file:
     :return:
     """
 
     input_path = os.path.splitext(input_file)
 
-    return irobout_url + input_path[0]
+    return irobot_url + input_path[0]
 
 
 def get_file_extensions(input_file: str, no_index: bool) -> list:
