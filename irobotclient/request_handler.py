@@ -19,10 +19,9 @@ import requests
 import time
 import errno
 
-from datetime import datetime, timezone
 from enum import Enum
 
-from irobotclient import configuration_handler
+from irobotclient import response_handler
 from irobotclient.custom_exceptions import IrobotClientException
 
 """
@@ -69,38 +68,33 @@ error_table = {
 
 
 class Requester:
-    def __init__(self, requested_url: str, authentication_credentials: dict, headers: dict):
+    def __init__(self, requested_url: str, headers: dict):
         """
 
         :param requested_url:
-        :param authentication_credentials:
+        :param headers:
         """
-        headers['Authorization'] = self._set_authentication_header(requested_url, authentication_credentials)
-
         self._request = requests.Request(url=requested_url, headers=headers)
-        self._request_delay = 0
 
-    def get_data(self, file_extension="") -> requests.Response:
+    def get_data(self, file_path="") -> requests.Response:
         """
 
         :return:
         """
-        self._request.url += file_extension
+        self._request.url += file_path
 
         try:
             for index in range(REQUEST_LIMIT):
 
-                time.sleep(self._request_delay)
+                response = requests.get(self._request, stream=True)
 
-                response = requests.head(self._request)
-
-                #print("self._request inside get_data() general: ", self._request.url)  # Beth - Debug
+                #print("self._request inside get_data() general: ", self._request)  # Beth - Debug
 
                 if response.status_code == ResponseCodes.SUCCESS:
-                    return requests.get(self._request, stream=True)
+                    return response
 
                 elif response.status_code == ResponseCodes.FETCHING_DATA:
-                    self._request_delay = self._get_request_delay(response)
+                    time.sleep(response_handler.get_request_delay(response))
 
                 elif response.status_code == ResponseCodes.RANGED_DATA:
                     pass  # TODO - This response could have a ETA of remaining data ranges
@@ -113,9 +107,8 @@ class Requester:
 
                 continue
 
-            else:
-                raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: Maximum number of request "
-                                                                              "retries. Please try again later.")
+            raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: Maximum number of request "
+                                                                          "retries. Please try again later.")
         except ConnectionError:
             raise
         except TimeoutError:
@@ -124,45 +117,3 @@ class Requester:
             raise
         except:
             raise
-
-    def _get_request_delay(self, response: requests.Response) -> int:
-        """
-
-        :return:
-        """
-
-        if "iRobot-ETA" in response.headers:
-            # Eg:  iRobot-ETA: 2017-09-25T12:34:56Z+0000 +/- 123
-            stripped_response_eta = (response.headers["iRobot-ETA"].split(' '))[0]
-            response_time = datetime.strptime(stripped_response_eta, "%Y-%m-%dT%H:%M:%SZ%z")
-            return int((response_time - datetime.now(tz=timezone.utc)).total_seconds())
-        else:
-            return configuration_handler.get_default_request_delay()
-
-    def _set_authentication_header(self, url: str, auth_credentials: dict) -> str:
-        """
-
-        :param response:
-        :return:
-        """
-        auth_response = requests.head(url + "/status")
-
-        try:
-            accepted_auth_types = auth_response.headers['WWW-Authenticate'].split(',')
-        except KeyError:
-            raise
-
-        for auth_type in accepted_auth_types:
-            if auth_type.strip() in auth_credentials.keys():
-                auth_string = f"{auth_type} {auth_credentials['auth_type']}"
-                response = requests.head(self._request.url + "/status", headers={'Authorization': auth_string})
-                if response.status_code == ResponseCodes.SUCCESS:
-                    return auth_string
-            else:
-                continue
-
-        return ""
-
-
-
-

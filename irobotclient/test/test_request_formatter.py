@@ -14,9 +14,9 @@ class TestRequestFormatter(unittest.TestCase):
         username = "tester"
         password = "password"
 
-        auth_strings = request_formatter.get_authentication_strings(arvados_token=auth_token,
-                                                               basic_username=username,
-                                                               basic_password=password)
+        auth_strings = request_formatter._get_authentication_strings(arvados_token=auth_token,
+                                                                     basic_username=username,
+                                                                     basic_password=password)
 
         basic_auth = HTTPBasicAuth(username, password)
         self.assertEqual(auth_strings, {'Arvados': f"Arvados {auth_token}",
@@ -29,40 +29,42 @@ class TestRequestFormatter(unittest.TestCase):
         url = request_formatter.get_url_request_path(irobot_url, input_file)
         self.assertEqual(url, "http://test/address/some/address/in/irods/file") # Note the missing extension.
 
-    def test_get_file_extensions_with_index_for_cram(self):
+    def test_get_file_list_with_index_for_cram(self):
         input_file = "/some/address/in/irods/file.cram"
 
-        extensions = request_formatter.get_file_extensions(input_file, False)
+        file_list = request_formatter.get_file_list(input_file, False)
 
-        self.assertEqual(extensions, [".cram", ".crai"])
+        self.assertEqual(file_list, ["/some/address/in/irods/file.cram", "/some/address/in/irods/file.crai"])
 
-    def test_get_file_extensions_with_index_for_bam(self):
+    def test_get_file_list_with_index_for_bam(self):
         input_file = "/some/address/in/irods/file.bam"
 
-        extensions = request_formatter.get_file_extensions(input_file, False)
+        file_list = request_formatter.get_file_list(input_file, False)
 
-        self.assertEqual(extensions, [".bam", ".bai", ".pbi"])
+        self.assertEqual(file_list, ["/some/address/in/irods/file.bam",
+                                     "/some/address/in/irods/file.bai",
+                                     "/some/address/in/irods/file.pbi"])
 
-    def test_get_file_extensions_without_index_for_bam(self):
+    def test_get_file_list_without_index_for_bam(self):
         input_file = "/some/address/in/irods/file.bam"
 
-        extensions = request_formatter.get_file_extensions(input_file, True)
+        file_list = request_formatter.get_file_list(input_file, True)
 
-        self.assertEqual(extensions, [".bam"])
+        self.assertEqual(file_list, [input_file])
 
-    def test_get_file_extension_without_input_extension(self):
+    def test_get_file_list_without_input_extension(self):
         input_file = "/some/address/in/irods/file"
 
-        extensions = request_formatter.get_file_extensions(input_file, False)
+        file_list = request_formatter.get_file_list(input_file, False)
 
-        self.assertEqual(extensions, [])
+        self.assertEqual(file_list, [input_file])
 
-    def test_get_file_extension_with_common_extension(self):
+    def test_get_file_list_with_common_extension(self):
         input_file = "/some/address/in/irods/file.txt"
 
-        extensions = request_formatter.get_file_extensions(input_file, False)
+        file_list = request_formatter.get_file_list(input_file, False)
 
-        self.assertEqual(extensions, [".txt"])
+        self.assertEqual(file_list, [input_file])
 
 
 if __name__ == '__main__':

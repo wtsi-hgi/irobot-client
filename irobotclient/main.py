@@ -56,46 +56,44 @@ def _download_data(response: Response, output_dir:str):
             for data_chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                 if data_chunk:
                     file.write(bytes(data_chunk))
-    except OSError as err:
-        _print_error_details(err)
     except:
-        raise IrobotClientException(errno=errno.ECONNABORTED, message="Cannot write content to file.")
+        raise
 
 
-def _run(request_handler: Requester, file_exts=None):
+def _run(request_handler: Requester, file_list: list):
     try:
+        for file in file_list:
+            # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
+            response = request_handler.get_data(file)
 
-        if not file_exts:
-            response = request_handler.get_data()
+            print(f"Response inside main.run(): {response}")  # Beth - debug
+
             _download_data(response, config_details.output_dir)
-            # TODO - checksum test if possible
-        else:
-            for ext in file_exts:
-                # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
-                response = request_handler.get_data(ext)
-
-                print(f"Response inside main.run(): {response}")  # Beth - debug
-
-                _download_data(response, config_details.output_dir)
-                # TODO - checksum test for each file if possible
+            # TODO - checksum test for each file if possible
 
         print("Exiting....")
-    except IrobotClientException as err:
-        _print_error_details(err)
-    except OSError as err:
-        _print_error_details(err)
+    except:
+        raise
 
 
 if __name__ == "__main__":
 
     # Set configurations from command line and/or environment.
-    config_details = configuration_handler.run()
+    try:
+        config_details = configuration_handler.run()
 
-    url = request_formatter.get_url_request_path(config_details.url, config_details.input_file)
-    authentication_credentials = request_formatter.get_authentication_strings(config_details.arvados_token,
-                                                                              config_details.basic_username,
-                                                                              config_details.basic_password)
-    headers = request_formatter.get_headers()
-    file_extensions = request_formatter.get_file_extensions(config_details.input_file, config_details.no_index)
+        url = request_formatter.get_url_request_path(config_details.url, config_details.input_file)
+        headers = request_formatter.get_headers(url,
+                                                config_details.arvados_token,
+                                                config_details.basic_username,
+                                                config_details.basic_password)
+        file_list = request_formatter.get_file_list(config_details.input_file, config_details.no_index)
 
-    _run(Requester(url, authentication_credentials, headers), file_extensions)
+        _run(Requester(url, headers), file_list)
+    except IrobotClientException as err:
+        _print_error_details(err)
+    except OSError as err:
+        _print_error_details(err)
+    except Exception as err:
+        print(err)
+        exit(1)

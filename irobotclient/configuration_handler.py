@@ -16,14 +16,10 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import argparse
-import string
 import os
 import errno
 
 from irobotclient.custom_exceptions import IrobotClientException
-
-# Default response wait time.
-DEFAULT_WAIT_RESPONSE_TIME = 600
 
 
 def _get_command_line_args(args=None):
@@ -160,17 +156,3 @@ def run(config_args=None):
     _validate_command_line_args(args)
 
     return args
-
-
-def get_default_request_delay() -> int:
-    """
-    If a 202 response returns with no iRobot-ETA header then a default delay (in seconds) will be set from the
-    environment or hardcoded in this function.
-
-    :return:
-    """
-
-    try:
-        return os.environ['IROBOT_REQUEST_DELAY_TIME']
-    except:
-        return DEFAULT_WAIT_RESPONSE_TIME
