@@ -23,6 +23,7 @@ from enum import Enum
 
 from irobotclient import response_handler
 from irobotclient.custom_exceptions import IrobotClientException
+from irobotclient.request_formatter import request_headers
 
 """
 Limit on how many times the same request is sent, including any alterations such as changes to the header.
@@ -68,15 +69,16 @@ error_table = {
 
 
 class Requester:
-    def __init__(self, requested_url: str, headers: dict):
+    def __init__(self, requested_url: str, headers: dict, additional_auth_credentials=None):
         """
 
         :param requested_url:
         :param headers:
         """
-        self._request = requests.Request(url=requested_url, headers=headers)
+        self._request = requests.Request(method='GET', url=requested_url, headers=headers)
+        self._additional_auth_credentials = additional_auth_credentials
 
-    def get_data(self, file_path="") -> requests.Response:
+    def get_data(self, file_path: str) -> requests.Response:
         """
 
         :return:
@@ -86,7 +88,9 @@ class Requester:
         try:
             for index in range(REQUEST_LIMIT):
 
-                response = requests.get(self._request, stream=True)
+                req = self._request.prepare()
+                session = requests.Session()
+                response = session.send(req, stream=True)
 
                 #print("self._request inside get_data() general: ", self._request)  # Beth - Debug
 
@@ -102,10 +106,13 @@ class Requester:
                 elif response.status_code == ResponseCodes.CLIENT_MATCHED:
                     pass  # TODO - Client has already downloaded this data; need to add sum to request for this to work?
 
+                elif response.status_code == ResponseCodes.AUTHENTICATION_FAILED and \
+                        self._additional_auth_credentials:
+                    self._request.headers[request_headers['AUTHORIZATION']] = \
+                        response_handler.update_authentication_header(response, self._additional_auth_credentials)
+
                 elif response.status_code in error_table.keys():
                     raise IrobotClientException(*error_table[response.status_code])
-
-                continue
 
             raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: Maximum number of request "
                                                                           "retries. Please try again later.")

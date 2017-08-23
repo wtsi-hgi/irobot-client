@@ -55,3 +55,23 @@ def get_request_delay(response: requests.Response) -> int:
         return int((response_time - datetime.now(tz=timezone.utc)).total_seconds())
     else:
         return _get_default_request_delay()
+
+
+def update_authentication_header(response: requests.Response, auth_credentials: list) -> str:
+    """
+
+    :param response:
+    :return:
+    """
+
+    try:
+        accepted_auth_types = response.headers[response_headers['ACCEPTED_AUTH_TYPES']].split(',')
+    except KeyError:
+        raise
+
+    for auth_type in accepted_auth_types:
+        for index, auth_string in enumerate(auth_credentials):
+            if auth_type.strip() in auth_string:
+                return f"{auth_type} {auth_credentials.pop(index)}"
+
+    return ""

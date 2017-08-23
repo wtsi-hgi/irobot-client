@@ -28,7 +28,7 @@ from irobotclient.request_handler import Requester
 CHUNK_SIZE = 1024
 
 
-def _print_error_details(error: OSError):
+def _print_error_details(error: Exception):
     """
     Print the output of any errors raised.
 
@@ -37,9 +37,12 @@ def _print_error_details(error: OSError):
     :param error:
     :return:
     """
+    while open('irobot_client_error.log', 'w'):
+        print(error, file=sys.stderr)
 
-    print(error, file=sys.stderr)
-    exit(error.errno)
+    if hasattr(error, 'errno'):
+        exit(error.errno)
+    exit(1)
 
 
 def _download_data(response: Response, output_dir:str):
@@ -83,17 +86,17 @@ if __name__ == "__main__":
         config_details = configuration_handler.run()
 
         url = request_formatter.get_url_request_path(config_details.url, config_details.input_file)
-        headers = request_formatter.get_headers(url,
-                                                config_details.arvados_token,
-                                                config_details.basic_username,
-                                                config_details.basic_password)
+        authentication_credentials = request_formatter.get_authentication_strings(config_details.arvados_token,
+                                                                                  config_details.basic_username,
+                                                                                  config_details.basic_password)
+        headers = request_formatter.get_headers(authentication_credentials)
         file_list = request_formatter.get_file_list(config_details.input_file, config_details.no_index)
 
-        _run(Requester(url, headers), file_list)
+        _run(Requester(url, headers, authentication_credentials), file_list)
     except IrobotClientException as err:
         _print_error_details(err)
     except OSError as err:
         _print_error_details(err)
     except Exception as err:
-        print(err)
-        exit(1)
+        print("Download failed, please check error log")
+        _print_error_details(err)

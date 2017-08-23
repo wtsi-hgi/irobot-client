@@ -14,13 +14,14 @@ class TestRequestFormatter(unittest.TestCase):
         username = "tester"
         password = "password"
 
-        auth_strings = request_formatter._get_authentication_strings(arvados_token=auth_token,
-                                                                     basic_username=username,
-                                                                     basic_password=password)
+        auth_strings = request_formatter.get_authentication_strings(arvados_token=auth_token,
+                                                                    basic_username=username,
+                                                                    basic_password=password)
 
         basic_auth = HTTPBasicAuth(username, password)
-        self.assertEqual(auth_strings, {'Arvados': f"Arvados {auth_token}",
-                                        'Basic': f"Basic {basic_auth}"})
+        self.assertEqual(auth_strings, [f"Arvados {auth_token}", f"Basic {basic_auth}"])
+
+    # TODO - Test get_headers
 
     def test_get_url_request_path(self):
         irobot_url = "http://test/address/"
