@@ -16,19 +16,19 @@ class TestResponseHandler(unittest.TestCase):
 
     """
     def setUp(self):
-        self._old_request_head = requests.get
+        self._session_send = requests.Session.send
         self._response = requests.Response()
-        requests.get = MagicMock(spec=requests.get)
+        requests.Session.send = MagicMock(spec=requests.Session.send)
         self._response.headers['WWW-Authenticate'] = "Arvados, Basic"
-        requests.get.return_value = self._response
-        self._test_requester = Requester("testURL", {"testKey": "testValue"})
+        requests.Session.send.return_value = self._response
+        self._test_requester = Requester("http://testURL", {"testKey": "testValue"})
 
         self._old_time_sleep = time.sleep
         time.sleep = MagicMock(spec=time.sleep)
         time.sleep.return_value = None
 
     def tearDown(self):
-        requests.get = self._old_request_head
+        requests.Session.send = self._session_send
         time.sleep = self._old_time_sleep
 
     def test_202_with_eta_header(self):
@@ -36,14 +36,14 @@ class TestResponseHandler(unittest.TestCase):
         self._response.headers['iRobot-ETA'] = future_time.strftime("%Y-%m-%dT%H:%M:%SZ+0000 +/- 123")
 
         try:
-            self._test_requester.get_data()
+            self._test_requester.get_data("test/file/path")
         except IrobotClientException:
             self.assertEqual(response_handler.get_request_delay(self._response),
                              int((future_time - datetime.now(tz=timezone.utc)).total_seconds()))
 
     def test_202_without_eta_header(self):
         try:
-            self._test_requester.get_data()
+            self._test_requester.get_data("test/file/path")
         except IrobotClientException:
             self.assertEqual(response_handler.get_request_delay(self._response),
                              response_handler._get_default_request_delay())

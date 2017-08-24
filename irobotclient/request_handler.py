@@ -19,8 +19,6 @@ import requests
 import time
 import errno
 
-from enum import Enum
-
 from irobotclient import response_handler
 from irobotclient.custom_exceptions import IrobotClientException
 from irobotclient.request_formatter import request_headers
@@ -39,32 +37,33 @@ is not going to work.
 REQUEST_LIMIT = 10
 
 # An enumeration to name HTTP response status codes.
-class ResponseCodes(Enum):
-    SUCCESS = 200
-    FETCHING_DATA = 202
-    RANGED_DATA = 206
-    CLIENT_MATCHED = 304
-    AUTHENTICATION_FAILED = 401
-    DENIED_IRODS = 403
-    NOT_FOUND = 404
-    INVALID_REQUEST_METHOD = 405
-    INVALID_MEDIA_REQUESTED = 406
-    INVALID_RANGE = 416
-    TIMEOUT = 504
-    PRECACHE_FULL = 507
+ResponseCodes = {
+    'SUCCESS': 200,
+    'FETCHING_DATA': 202,
+    'RANGED_DATA': 206,
+    'CLIENT_MATCHED': 304,
+    'AUTHENTICATION_FAILED': 401,
+    'DENIED_IRODS': 403,
+    'NOT_FOUND': 404,
+    'INVALID_REQUEST_METHOD': 405,
+    'INVALID_MEDIA_REQUESTED': 406,
+    'INVALID_RANGE': 416,
+    'TIMEOUT': 504,
+    'PRECACHE_FULL': 507
+}
 
 # Set HTTP response error codes to an associated standard error number and custom message.
 error_table = {
-    ResponseCodes.AUTHENTICATION_FAILED: (errno.ECONNABORTED, "Authentication failed."),
-    ResponseCodes.DENIED_IRODS: (errno.EACCES, "Access to IRODs denied."),
-    ResponseCodes.NOT_FOUND: (errno.ENODATA, "The file requested cannot be found.  Please check the "
-                                             "path and name of the requested file."),
-    ResponseCodes.INVALID_REQUEST_METHOD: (errno.EPROTO, "Invalid HTTP request method."),
-    ResponseCodes.INVALID_MEDIA_REQUESTED: (errno.EINVAL, "Unsupported HTTP media type requested."),
-    ResponseCodes.INVALID_RANGE: (errno.ERANGE, "Invalid data range requested."),
-    ResponseCodes.TIMEOUT: (errno.ETIMEDOUT, "Connection timeout from iRobot."),
-    ResponseCodes.PRECACHE_FULL: (errno.ENOMEM, "Precache is full or too small for the size of the "
-                                                "requested file.")
+    ResponseCodes['AUTHENTICATION_FAILED']: (errno.ECONNABORTED, "Authentication failed."),
+    ResponseCodes['DENIED_IRODS']: (errno.EACCES, "Access to IRODs denied."),
+    ResponseCodes['NOT_FOUND']: (errno.ENODATA, "The file requested cannot be found.  Please check the "
+                                                "path and name of the requested file."),
+    ResponseCodes['INVALID_REQUEST_METHOD']: (errno.EPROTO, "Invalid HTTP request method."),
+    ResponseCodes['INVALID_MEDIA_REQUESTED']: (errno.EINVAL, "Unsupported HTTP media type requested."),
+    ResponseCodes['INVALID_RANGE']: (errno.ERANGE, "Invalid data range requested."),
+    ResponseCodes['TIMEOUT']: (errno.ETIMEDOUT, "Connection timeout from iRobot."),
+    ResponseCodes['PRECACHE_FULL']: (errno.ENOMEM, "Precache is full or too small for the size of the "
+                                                      "requested file.")
 }
 
 
@@ -92,21 +91,21 @@ class Requester:
                 session = requests.Session()
                 response = session.send(req, stream=True)
 
-                #print("self._request inside get_data() general: ", self._request)  # Beth - Debug
+                # print("Response code: ", response.status_code)  # Beth - Debug
 
-                if response.status_code == ResponseCodes.SUCCESS:
+                if response.status_code == ResponseCodes['SUCCESS']:
                     return response
 
-                elif response.status_code == ResponseCodes.FETCHING_DATA:
+                elif response.status_code == ResponseCodes['FETCHING_DATA']:
                     time.sleep(response_handler.get_request_delay(response))
 
-                elif response.status_code == ResponseCodes.RANGED_DATA:
+                elif response.status_code == ResponseCodes['RANGED_DATA']:
                     pass  # TODO - This response could have a ETA of remaining data ranges
 
-                elif response.status_code == ResponseCodes.CLIENT_MATCHED:
+                elif response.status_code == ResponseCodes['CLIENT_MATCHED']:
                     pass  # TODO - Client has already downloaded this data; need to add sum to request for this to work?
 
-                elif response.status_code == ResponseCodes.AUTHENTICATION_FAILED and \
+                elif response.status_code == ResponseCodes['AUTHENTICATION_FAILED'] and \
                         self._additional_auth_credentials:
                     self._request.headers[request_headers['AUTHORIZATION']] = \
                         response_handler.update_authentication_header(response, self._additional_auth_credentials)
@@ -115,7 +114,9 @@ class Requester:
                     raise IrobotClientException(*error_table[response.status_code])
 
             raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: Maximum number of request "
-                                                                          "retries. Please try again later.")
+                                                                          "retries.  This could be because of a large "
+                                                                          "file being fetch.  Please try again later.")
+
         except ConnectionError:
             raise
         except TimeoutError:

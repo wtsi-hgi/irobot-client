@@ -37,8 +37,10 @@ def _print_error_details(error: Exception):
     :param error:
     :return:
     """
-    while open('irobot_client_error.log', 'w'):
-        print(error, file=sys.stderr)
+    with open('irobot_client_error.log', 'w') as error_file:
+        error_file.write(str(error))
+
+    print("Error: program terminated unexpectedly.  Please check irobot_client_error.log")
 
     if hasattr(error, 'errno'):
         exit(error.errno)
@@ -52,31 +54,31 @@ def _download_data(response: Response, output_dir:str):
     :param output_dir:
     :return:
     """
-    try:
-        file_name = (path.split(response.url))[1]
+    file_name = (path.split(response.url))[1]
 
-        with open(f"{output_dir}{file_name}", "wb") as file:
-            for data_chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                if data_chunk:
-                    file.write(bytes(data_chunk))
-    except:
-        raise
+    with open(f"{output_dir}{file_name}", "wb") as file:
+        for data_chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+            if data_chunk:
+                file.write(bytes(data_chunk))
 
 
 def _run(request_handler: Requester, file_list: list):
-    try:
-        for file in file_list:
-            # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
-            response = request_handler.get_data(file)
+    """
 
-            print(f"Response inside main.run(): {response}")  # Beth - debug
+    :param request_handler:
+    :param file_list:
+    :return:
+    """
+    for file in file_list:
+        # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
+        response = request_handler.get_data(file)
 
-            _download_data(response, config_details.output_dir)
-            # TODO - checksum test for each file if possible
+        print(f"Response inside main.run(): {response}")  # Beth - debug
 
-        print("Exiting....")
-    except:
-        raise
+        _download_data(response, config_details.output_dir)
+        # TODO - checksum test for each file if possible
+
+    print("Exiting....")
 
 
 if __name__ == "__main__":
