@@ -16,8 +16,8 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import requests
-from datetime import datetime, timezone
 
+from datetime import datetime, timezone
 
 # Default response wait time.
 DEFAULT_WAIT_RESPONSE_TIME = 600

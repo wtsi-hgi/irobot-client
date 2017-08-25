@@ -4,9 +4,10 @@ from unittest.mock import MagicMock
 import requests
 import time
 import errno
+import json
 
 from irobotclient.custom_exceptions import IrobotClientException
-from irobotclient.request_handler import Requester, ResponseCodes, error_table
+from irobotclient.request_handler import Requester, ResponseCodes
 
 
 class TestRequester(unittest.TestCase):
@@ -56,14 +57,14 @@ class TestRequester(unittest.TestCase):
         # TODO - Implement
 
     def test_error_responses(self):
-        for code in error_table.keys():
-            test_path = "test/file/path"
-            self._response.status_code = code
+        self._response.status_code = ResponseCodes['NOT_FOUND']
+        self._response._content = bytearray(json.dumps({'description': 'Content not found'}), 'utf-8')
+        test_path = "test/file/path"
 
-            self.assertRaisesRegex(IrobotClientException, str(error_table[code][0]),
-                                   self._test_requester.get_data, test_path)
-            self.assertRaisesRegex(IrobotClientException, error_table[code][1],
-                                   self._test_requester.get_data, test_path)
+        self.assertRaisesRegex(IrobotClientException, str(ResponseCodes['NOT_FOUND']),
+                               self._test_requester.get_data, test_path)
+        self.assertRaisesRegex(IrobotClientException, 'Content not found',
+                               self._test_requester.get_data, test_path)
 
 
 if __name__ == '__main__':

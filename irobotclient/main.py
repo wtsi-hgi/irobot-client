@@ -23,7 +23,7 @@ from requests import Response
 from irobotclient import configuration_handler
 from irobotclient import request_formatter
 from irobotclient.custom_exceptions import IrobotClientException
-from irobotclient.request_handler import Requester
+from irobotclient.request_handler import Requester, ResponseCodes
 
 # Error log
 ERROR_LOG_FILE = "irobot_client_error.log"
@@ -37,7 +37,7 @@ def _set_error_logger(file_name: str) -> logging.Logger:
     logger.setLevel(logging.ERROR)
 
     handler = RotatingFileHandler(ERROR_LOG_FILE, maxBytes=10000)
-    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    formatter = logging.Formatter('\n%(asctime)s - %(message)s')
 
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -78,7 +78,7 @@ def _download_data(response: Response, output_dir:str):
                 file.write(bytes(data_chunk))
 
 
-def _run(request_handler: Requester, file_list: list):
+def _run(request_handler: Requester, file_list: list, log=None):
     """
 
     :param request_handler:
@@ -86,8 +86,14 @@ def _run(request_handler: Requester, file_list: list):
     :return:
     """
     for file in file_list:
-        # TODO - handle index file issues whereby a bam bai file may not be present but a pbi might.
-        response = request_handler.get_data(file)
+        try:
+            response = request_handler.get_data(file)
+        except IrobotClientException as err:
+            if file != file_list[-1] and err.errno is ResponseCodes['NOT_FOUND']:  # TODO: double check this works
+                log.exception(IrobotClientException)
+                continue
+            else:
+                raise
 
         print(f"Response inside main.run(): {response}")  # Beth - debug
 

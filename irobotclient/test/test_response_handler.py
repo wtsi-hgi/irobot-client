@@ -8,7 +8,7 @@ import requests
 
 from irobotclient import response_handler
 from irobotclient.custom_exceptions import IrobotClientException
-from irobotclient.request_handler import Requester, ResponseCodes
+from irobotclient.request_handler import Requester
 
 
 class TestResponseHandler(unittest.TestCase):
@@ -32,6 +32,7 @@ class TestResponseHandler(unittest.TestCase):
         time.sleep = self._old_time_sleep
 
     def test_202_with_eta_header(self):
+        self._response.status_code = 202
         future_time = datetime.now(tz=timezone.utc) + timedelta(minutes=5)
         self._response.headers['iRobot-ETA'] = future_time.strftime("%Y-%m-%dT%H:%M:%SZ+0000 +/- 123")
 
@@ -42,6 +43,8 @@ class TestResponseHandler(unittest.TestCase):
                              int((future_time - datetime.now(tz=timezone.utc)).total_seconds()))
 
     def test_202_without_eta_header(self):
+        self._response.status_code = 202
+
         try:
             self._test_requester.get_data("test/file/path")
         except IrobotClientException:

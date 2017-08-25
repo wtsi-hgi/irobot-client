@@ -52,20 +52,6 @@ ResponseCodes = {
     'PRECACHE_FULL': 507
 }
 
-# Set HTTP response error codes to an associated standard error number and custom message.
-error_table = {
-    ResponseCodes['AUTHENTICATION_FAILED']: (errno.ECONNABORTED, "Authentication failed."),
-    ResponseCodes['DENIED_IRODS']: (errno.EACCES, "Access to IRODs denied."),
-    ResponseCodes['NOT_FOUND']: (errno.ENODATA, "The file requested cannot be found.  Please check the "
-                                                "path and name of the requested file."),
-    ResponseCodes['INVALID_REQUEST_METHOD']: (errno.EPROTO, "Invalid HTTP request method."),
-    ResponseCodes['INVALID_MEDIA_REQUESTED']: (errno.EINVAL, "Unsupported HTTP media type requested."),
-    ResponseCodes['INVALID_RANGE']: (errno.ERANGE, "Invalid data range requested."),
-    ResponseCodes['TIMEOUT']: (errno.ETIMEDOUT, "Connection timeout from iRobot."),
-    ResponseCodes['PRECACHE_FULL']: (errno.ENOMEM, "Precache is full or too small for the size of the "
-                                                      "requested file.")
-}
-
 
 class Requester:
     def __init__(self, requested_url: str, headers: dict, additional_auth_credentials=None):
@@ -110,8 +96,8 @@ class Requester:
                     self._request.headers[request_headers['AUTHORIZATION']] = \
                         response_handler.update_authentication_header(response, self._additional_auth_credentials)
 
-                elif response.status_code in error_table.keys():
-                    raise IrobotClientException(*error_table[response.status_code])
+                elif 400 <= response.status_code < 600:
+                    raise IrobotClientException(response.status_code, response.json()['description'])
 
             raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: Maximum number of request "
                                                                           "retries.  This could be because of a large "
