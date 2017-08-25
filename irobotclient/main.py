@@ -14,8 +14,9 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import errno
-import sys
+import logging
+
+from logging.handlers import RotatingFileHandler
 from os import path
 from requests import Response
 
@@ -24,11 +25,27 @@ from irobotclient import request_formatter
 from irobotclient.custom_exceptions import IrobotClientException
 from irobotclient.request_handler import Requester
 
+# Error log
+ERROR_LOG_FILE = "irobot_client_error.log"
+
 # Limit for the size (in bytes) of data downloaded at a time.
 CHUNK_SIZE = 1024
 
 
-def _print_error_details(error: Exception):
+def _set_error_logger(file_name: str) -> logging.Logger:
+    logger = logging.getLogger("Rotating log")
+    logger.setLevel(logging.ERROR)
+
+    handler = RotatingFileHandler(ERROR_LOG_FILE, maxBytes=10000)
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
+
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    return logger
+
+
+def _handle_error_details(error: Exception, log: logging.Logger):
     """
     Print the output of any errors raised.
 
@@ -37,10 +54,9 @@ def _print_error_details(error: Exception):
     :param error:
     :return:
     """
-    with open('irobot_client_error.log', 'w') as error_file:
-        error_file.write(str(error))
+    log.exception(error)
 
-    print("Error: program terminated unexpectedly.  Please check irobot_client_error.log")
+    print(f"{error}\nError: program terminated; please check irobot_client_error.log for more details")
 
     if hasattr(error, 'errno'):
         exit(error.errno)
@@ -83,6 +99,8 @@ def _run(request_handler: Requester, file_list: list):
 
 if __name__ == "__main__":
 
+    log = _set_error_logger(ERROR_LOG_FILE)
+
     # Set configurations from command line and/or environment.
     try:
         config_details = configuration_handler.run()
@@ -96,9 +114,9 @@ if __name__ == "__main__":
 
         _run(Requester(url, headers, authentication_credentials), file_list)
     except IrobotClientException as err:
-        _print_error_details(err)
+        _handle_error_details(err, log)
     except OSError as err:
-        _print_error_details(err)
+        _handle_error_details(err, log)
     except Exception as err:
         print("Download failed, please check error log")
-        _print_error_details(err)
+        _handle_error_details(err, log)
