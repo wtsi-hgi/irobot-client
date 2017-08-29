@@ -23,17 +23,7 @@ from irobotclient import response_handler
 from irobotclient.custom_exceptions import IrobotClientException
 from irobotclient.request_formatter import request_headers
 
-"""
-Limit on how many times the same request is sent, including any alterations such as changes to the header.
-In theory a single request will take two attempts; one for the HEAD request to make sure the data exists and
-a second to GET the data.
-
-However, a request may generate a response to wait for the data to be fetched and try again later or to attempt
-a different authorisation method.
-
-Either way, the limit defined below helps prevent stack overflow and unnecessary requests when it is clear a request
-is not going to work.
-"""
+# Limit the amount of consecutive request retries.
 REQUEST_LIMIT = 10
 
 # An enumeration to name HTTP response status codes.
@@ -97,7 +87,10 @@ class Requester:
                         response_handler.update_authentication_header(response, self._additional_auth_credentials)
 
                 elif 400 <= response.status_code < 600:
-                    raise IrobotClientException(response.status_code, response.json()['description'])
+                    try:
+                        raise IrobotClientException(response.status_code, response.json()['description'])
+                    except ValueError:
+                        raise
 
             raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: Maximum number of request "
                                                                           "retries.  This could be because of a large "

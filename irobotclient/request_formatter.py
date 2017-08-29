@@ -24,7 +24,8 @@ EXT_MAPPING = {
 
 
 request_headers = {
-    'AUTHORIZATION': "Authorization"
+    'AUTHORIZATION': "Authorization",
+    'ACCEPT': "Accept"
 }
 
 
@@ -88,7 +89,8 @@ def get_headers(authentication_credentials: list) -> dict:
     """
 
     headers = {
-        request_headers['AUTHORIZATION']: authentication_credentials.pop(0)
+        request_headers['AUTHORIZATION']: authentication_credentials.pop(0),
+        request_headers['ACCEPT']: "application/octet-stream"
     }
 
     return headers
