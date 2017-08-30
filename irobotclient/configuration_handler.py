@@ -23,11 +23,7 @@ from irobotclient.custom_exceptions import IrobotClientException
 
 
 def _get_command_line_args(args=None):
-    """
-    Get program arguments, calls validation methods, and returns the values in the argparse object.
-
-    :return: args
-    """
+    # Get program arguments from the commandline, parse them, and then return them.
 
     parser = argparse.ArgumentParser(prog="irobot-client",
                                      formatter_class=argparse.RawTextHelpFormatter,
@@ -61,12 +57,8 @@ def _get_command_line_args(args=None):
 
 
 def _validate_command_line_args(args):
-    """
-    Ensures all the necessary details are set to form the requests.
+    # Ensures all the necessary details are set and formatted.
 
-    :param args:
-    :return:
-    """
     _check_input_file_argument(args)
     _check_output_directory_argument(args)
     _check_url_argument(args)
@@ -74,11 +66,9 @@ def _validate_command_line_args(args):
 
 
 def _check_input_file_argument(args):
-    """
-    Strip leading slash from input argument to prevent double slashes in API request.
+    # Simple check to see if the input argument is a directory.
+    # Strips the leading slash from the input argument to prevent double slashes in the API request.
 
-    :param args: the command line arguments
-    """
     if args.input_file.endswith('/'):
         raise IrobotClientException(errno=errno.ECONNABORTED,
                                     message="Cannot download entire directories at present.")
@@ -88,12 +78,7 @@ def _check_input_file_argument(args):
 
 
 def _check_output_directory_argument(args):
-    """
-    Check if the output directory already exists and if it already contains files of the same name as the input file.
-
-    :return: n/a
-
-    """
+    # Check if the output directory already exists and if it already contains files of the same name as the input file.
 
     # Expand the output_dir argument so the full directory path can be used in the rest of the program.
     args.output_dir = os.path.expanduser(args.output_dir)
@@ -117,12 +102,8 @@ def _check_output_directory_argument(args):
 
 
 def _check_url_argument(args):
-    """
-    Check if a url has been provided via command line or environment setting and check trailing slash.
+    # Check if a url has been provided via command line or environment setting and check trailing slash.
 
-    :param args:
-    :return:
-    """
     if args.url is None:
         raise IrobotClientException(errno=errno.EINVAL, message="No iRobot URL specified; please check input "
                                                                 "arguments and/or environment variables.")
@@ -132,24 +113,19 @@ def _check_url_argument(args):
 
 
 def _check_authorisation_credentials(args):
-    """
-    Check if the authorisation credentials have been set on the command line or environment variable.
-    If no credentials are supplied then the values will be obtained from the environment.
+    # Check if the authorisation credentials have been set on the command line or environment variable.
 
-    :param args:
-    :return:
-    """
     if not args.arvados_token and not args.basic_password:
         raise IrobotClientException(errno=errno.EACCES, message="No Arvados or Basic authentication set; please check "
                                                                 "input arguments and/or environment variables.")
 
 
-def run(config_args=None):
+def run(config_args=None) -> argparse.ArgumentParser:
     """
     Calls the functions to collect any command line arguments, set configuration details needed for the iRobot
     requests, and return the argparse object to the request formatter.
 
-    :return:
+    :return: ArgumentParser object - containing all the necessary formatted request details.
     """
 
     args = _get_command_line_args(config_args)

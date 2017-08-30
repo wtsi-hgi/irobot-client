@@ -22,12 +22,13 @@ from datetime import datetime, timezone
 # Default response wait time.
 DEFAULT_WAIT_RESPONSE_TIME = 600
 
+# The useful headers expected in responses from iRobot
 response_headers = {
     'ETA': "iRobot-ETA",
     'ACCEPTED_AUTH_TYPES': "WWW-Authenticate"
 }
 
-
+# TODO - docstrings
 def _get_default_request_delay() -> int:
     """
     If a 202 response returns with no iRobot-ETA header then a default delay (in seconds) will be set from the

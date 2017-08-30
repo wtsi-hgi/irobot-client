@@ -17,32 +17,19 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 from requests.auth import HTTPBasicAuth
 
+# A map of sorts to couple the data files to their index files.
 EXT_MAPPING = {
     ".cram": (".crai",),
     ".bam":  (".bai", ".pbi")
 }
 
-
+# A dictionary of the headers required for the request.
 request_headers = {
     'AUTHORIZATION': "Authorization",
     'ACCEPT': "Accept"
 }
 
-
-def get_url_request_path(irobot_url: str, input_file: str) -> str:
-    """
-    Return the URL for the requested data without any file extensions if supplied.
-
-    :param irobot_url:
-    :param input_file:
-    :return:
-    """
-
-    input_path = os.path.splitext(input_file)
-
-    return irobot_url + input_path[0]
-
-
+# TODO - update docstrings
 def get_file_list(input_file: str, no_index: bool) -> list:
     """
     Return all the files that are to be requested.

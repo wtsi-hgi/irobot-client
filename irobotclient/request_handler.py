@@ -42,7 +42,7 @@ ResponseCodes = {
     'PRECACHE_FULL': 507
 }
 
-
+# TODO - update docstrings
 class Requester:
     def __init__(self, requested_url: str, headers: dict, additional_auth_credentials=None):
         """
@@ -50,7 +50,9 @@ class Requester:
         :param requested_url:
         :param headers:
         """
-        self._request = requests.Request(method='GET', url=requested_url, headers=headers)
+
+        self._requested_url = requested_url
+        self._headers = headers
         self._additional_auth_credentials = additional_auth_credentials
 
     def get_data(self, file_path: str) -> requests.Response:
@@ -58,16 +60,17 @@ class Requester:
 
         :return:
         """
-        self._request.url += file_path
+        full_url = self._requested_url + file_path
 
         try:
             for index in range(REQUEST_LIMIT):
 
-                req = self._request.prepare()
+                request = requests.Request(method='GET', url=full_url, headers=self._headers)
+                req = request.prepare()
                 session = requests.Session()
                 response = session.send(req, stream=True)
 
-                # print("Response code: ", response.status_code)  # Beth - Debug
+                print(f"Response Full_URL: {full_url}")
 
                 if response.status_code == ResponseCodes['SUCCESS']:
                     return response
@@ -83,7 +86,7 @@ class Requester:
 
                 elif response.status_code == ResponseCodes['AUTHENTICATION_FAILED'] and \
                         self._additional_auth_credentials:
-                    self._request.headers[request_headers['AUTHORIZATION']] = \
+                    self._headers[request_headers['AUTHORIZATION']] = \
                         response_handler.update_authentication_header(response, self._additional_auth_credentials)
 
                 elif 400 <= response.status_code < 600:
