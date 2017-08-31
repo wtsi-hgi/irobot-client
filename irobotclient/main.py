@@ -1,18 +1,6 @@
 """
-Copyright (c) 2017 Genome Research Ltd.
+main.py - the entry point of the program.
 
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 
@@ -87,7 +75,7 @@ def _run(request_handler: Requester, file_list: list, log=None):
         _download_data(response, config_details.output_dir)
         # TODO - checksum test for each file if possible
 
-    print("Exiting....")
+    print("Downloads complete. Exiting....")
 
 
 if __name__ == "__main__":
@@ -100,11 +88,8 @@ if __name__ == "__main__":
         authentication_credentials = request_formatter.get_authentication_strings(config_details.arvados_token,
                                                                                   config_details.basic_username,
                                                                                   config_details.basic_password)
-        headers = request_formatter.get_headers(authentication_credentials)
+        headers = request_formatter.get_headers(authentication_credentials.pop(0))
         file_list = request_formatter.get_file_list(config_details.input_file, config_details.no_index)
-
-        print(f"File_list: {file_list}")  # Beth - debug
-        print (f"URL: {config_details.url}")  # Beth - debug
 
         _run(Requester(config_details.url, headers, authentication_credentials), file_list)
     except IrobotClientException as err:

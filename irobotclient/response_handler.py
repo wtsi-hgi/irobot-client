@@ -1,18 +1,6 @@
 """
-Copyright (c) 2017 Genome Research Ltd.
+response_handler.py - handles specific unsuccessful iRobot responses codes to attempt the request again.
 
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import requests
@@ -28,14 +16,9 @@ response_headers = {
     'ACCEPTED_AUTH_TYPES': "WWW-Authenticate"
 }
 
-# TODO - docstrings
-def _get_default_request_delay() -> int:
-    """
-    If a 202 response returns with no iRobot-ETA header then a default delay (in seconds) will be set from the
-    environment or hardcoded in this function.
 
-    :return:
-    """
+def _get_default_request_delay() -> int:
+    # If a 202 response returns with no iRobot-ETA header then a delay will be set by this method.
 
     try:
         return os.environ['IROBOT_REQUEST_DELAY_TIME']
@@ -45,8 +28,10 @@ def _get_default_request_delay() -> int:
 
 def get_request_delay(response: requests.Response) -> int:
     """
+    Handle the wait time for 202 responses by processing the ETA header or setting a default value if necessary.
 
-    :return:
+    :param response: the response from iRobot.
+    :return: an integer value equating to seconds to wait until the request should be sent again.
     """
 
     if response_headers['ETA'] in response.headers:
@@ -60,9 +45,14 @@ def get_request_delay(response: requests.Response) -> int:
 
 def update_authentication_header(response: requests.Response, auth_credentials: list) -> str:
     """
+    Returns an accepted authentication string to use in the next request following an authentication failure response.
 
-    :param response:
-    :return:
+    If none of the credentials match any of the accepted authentication methods supplied in the response header,
+    the list of credentials is clear to avoid this method being called again unnecessarily.
+
+    :param response: the response from iRobot.
+    :param auth_credentials: a list of authentication credentials.
+    :return: a string to set the authentication header on the request.
     """
 
     try:
@@ -75,4 +65,5 @@ def update_authentication_header(response: requests.Response, auth_credentials: 
             if auth_type.strip() in auth_string:
                 return f"{auth_type} {auth_credentials.pop(index)}"
 
+    auth_credentials.clear()
     return ""

@@ -1,20 +1,7 @@
 """
-Copyright (c) 2017 Genome Research Ltd.
+request_handler.py - Requester class to make the request to iRobot and attempt to rectify any failure responses.
 
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
 import requests
 import time
 import errno
@@ -42,13 +29,24 @@ ResponseCodes = {
     'PRECACHE_FULL': 507
 }
 
-# TODO - update docstrings
+
 class Requester:
+    """
+    This class sends a request to iRobot and attempts to rectify any failed attempts dependent on the response
+    return code.  A successful request causes the class to pass the response up to the calling code to handle
+    the data download.
+
+    Public methods:
+    get_data - handles the requesting of data.
+    """
+
     def __init__(self, requested_url: str, headers: dict, additional_auth_credentials=None):
         """
+        Instantiates a class object with the data require for a request attempt.
 
-        :param requested_url:
-        :param headers:
+        :param requested_url: a string of the iRobot server url not including the file path.
+        :param headers: a dictionary of the headers for the request.
+        :param additional_auth_credentials: a list of additional authentication credentials is available.
         """
 
         self._requested_url = requested_url
@@ -57,9 +55,12 @@ class Requester:
 
     def get_data(self, file_path: str) -> requests.Response:
         """
+        Requests the data from iRobot
 
-        :return:
+        :param file_path: the full path of the file requested.
+        :return: a successful iRobot response
         """
+
         full_url = self._requested_url + file_path
 
         try:
@@ -69,8 +70,6 @@ class Requester:
                 req = request.prepare()
                 session = requests.Session()
                 response = session.send(req, stream=True)
-
-                print(f"Response Full_URL: {full_url}")
 
                 if response.status_code == ResponseCodes['SUCCESS']:
                     return response

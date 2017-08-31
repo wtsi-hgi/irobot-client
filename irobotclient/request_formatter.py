@@ -1,23 +1,11 @@
 """
-Copyright (c) 2017 Genome Research Ltd.
+request_formatter.py - formats the headers, URL and other necessary features of the requests.
 
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 from requests.auth import HTTPBasicAuth
 
-# A map of sorts to couple the data files to their index files.
+# A map to couple the data files to their index files.
 EXT_MAPPING = {
     ".cram": (".crai",),
     ".bam":  (".bai", ".pbi")
@@ -29,14 +17,16 @@ request_headers = {
     'ACCEPT': "Accept"
 }
 
-# TODO - update docstrings
+
 def get_file_list(input_file: str, no_index: bool) -> list:
     """
-    Return all the files that are to be requested.
+    Return all the files (full paths) that are to be downloaded.  This includes index files unless otherwise requested.
 
-    :param input_file:
-    :return:
+    :param input_file: the full path to the requested file.
+    :param no_index: flag to not download the index files by default.
+    :return: a list of all full paths of all the files to be downloaded.
     """
+
     file_list = [input_file]
 
     file, extension = os.path.splitext(input_file)
@@ -50,11 +40,14 @@ def get_file_list(input_file: str, no_index: bool) -> list:
 
 def get_authentication_strings(arvados_token: str, basic_username: str, basic_password: str) -> list:
     """
-    Set the request authentication_credentials and return them as a dictionary.
+    Set the authentication credentials and return them as a dictionary to be used in the request header.
 
-    :param auth_type:
-    :param arvados_token:
-    :return:
+    This includes creating a 64-bit hash of the username and password for basic authentication.
+
+    :param arvados_token: the string to enable arvados authentication.
+    :param basic_username: a string of the username to be used for basic authentication.
+    :param basic_password: a string of the password to be used for basic authentication.
+    :return: a list of of strings contain authentication credentials.
     """
 
     authentication_credentials = []
@@ -69,15 +62,17 @@ def get_authentication_strings(arvados_token: str, basic_username: str, basic_pa
     return authentication_credentials
 
 
-def get_headers(authentication_credentials: list) -> dict:
+def get_headers(authentication_credentials: str) -> dict:
     """
+    Sets the correct values for the needed request headers and returns them as a dictionary.
 
-    :return:
+    :param authentication_credentials: the string to be used in the first request.
+    :return: a dictionary of the request headers.
     """
 
     headers = {
-        request_headers['AUTHORIZATION']: authentication_credentials.pop(0),
-        request_headers['ACCEPT']: "application/octet-stream"
+        request_headers['AUTHORIZATION']: authentication_credentials,
+        request_headers['ACCEPT']: "application/octet-stream"  # TODO - remove this explicit header definition
     }
 
     return headers
