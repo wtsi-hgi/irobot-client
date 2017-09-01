@@ -84,8 +84,7 @@ def get_headers(authentication_credentials: str) -> dict:
     """
 
     headers = {
-        request_headers['AUTHORIZATION']: authentication_credentials,
-        request_headers['ACCEPT']: "application/octet-stream"  # TODO - remove this explicit header definition
+        request_headers['AUTHORIZATION']: authentication_credentials
     }
 
     return headers

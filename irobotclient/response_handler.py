@@ -17,6 +17,7 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 """response_handler.py - handles specific unsuccessful iRobot responses codes to attempt the request again."""
 import os
 import requests
+import re
 
 from datetime import datetime, timezone
 
@@ -70,9 +71,17 @@ def update_authentication_header(response: requests.Response, auth_credentials: 
     """
 
     try:
-        accepted_auth_types = response.headers[response_headers['ACCEPTED_AUTH_TYPES']].split(',')
+        response_auth_header_string = response.headers[response_headers['ACCEPTED_AUTH_TYPES']]
     except KeyError:
         raise
+
+    if '=' in response_auth_header_string:
+        # Non-greedy removal of everything between quotation marks
+        response_auth_header_string = re.sub(r'\".*?"', '', response_auth_header_string)
+        # Remove the realm keyword
+        response_auth_header_string = re.sub(r'realm=', '', response_auth_header_string)
+
+    accepted_auth_types = response_auth_header_string.split(',')
 
     for auth_type in accepted_auth_types:
         for index, auth_string in enumerate(auth_credentials):

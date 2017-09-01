@@ -132,5 +132,4 @@ if __name__ == "__main__":
     except OSError as err:
         _handle_error_details(err, log)
     except Exception as err:
-        print("Download failed, please check error log")
         _handle_error_details(err, log)

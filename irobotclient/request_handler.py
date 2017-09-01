@@ -104,7 +104,7 @@ class Requester:
                 elif 400 <= response.status_code < 600:
                     try:
                         raise IrobotClientException(response.status_code, response.json()['description'])
-                    except ValueError:
+                    except:
                         raise
 
             raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: Maximum number of request "
