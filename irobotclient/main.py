@@ -63,16 +63,22 @@ def _handle_error_details(error: Exception, log: logging.Logger):
     exit(1)
 
 
-def _download_data(response: Response, save_location: str):
-    # Downloads data to a file in the the output directory in iterable chunks.
+def _download_data(response: Response, save_location: str) -> str:
+    # Downloads data to a file in the the output directory in iterable chunks.  Calculated checksum as it goes and
+    # returns the hex string.
+
+    hasher = hashlib.md5()
 
     with open(save_location, "wb") as file:
         for data_chunk in response.iter_content(chunk_size=CHUNK_SIZE):
             if data_chunk:
                 file.write(bytes(data_chunk))
+                hasher.update(bytes(data_chunk))
+
+    return hasher.hexdigest()
 
 
-def _validate_downloaded_data(response: Response, file_path: str):
+def _validate_downloaded_data(response: Response, calculated_checksum: str):
     # Check that the response checksum tag matches the file checksum.
 
     try:
@@ -80,12 +86,7 @@ def _validate_downloaded_data(response: Response, file_path: str):
     except KeyError:
         raise
 
-    hasher = hashlib.md5()
-    with open(file_path, 'rb') as file:
-        for chunk in iter(lambda: file.read(4096), b""):
-            hasher.update(chunk)
-
-    if not hasher.hexdigest() == checksum:
+    if not calculated_checksum == checksum:
         raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: The checksum of the downloaded file does "
                                                                       "not match the checksum expected.  The file may "
                                                                       "be corrupt or missing data.  Please try again.")
@@ -106,8 +107,8 @@ def _run(request_handler: Requester, file_list: list, log=None):
                 raise
 
         full_file_path = config_details.output_dir + (path.split(response.url))[1]
-        _download_data(response, full_file_path)
-        _validate_downloaded_data(response, full_file_path)
+        checksum = _download_data(response, full_file_path)
+        _validate_downloaded_data(response, checksum)
 
     print("Downloads complete. Exiting....")
 
