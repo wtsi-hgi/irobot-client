@@ -23,13 +23,6 @@ class TestRequestFormatter(unittest.TestCase):
 
     # TODO - Test get_headers
 
-    def test_get_url_request_path(self):
-        irobot_url = "http://test/address/"
-        input_file = "some/address/in/irods/file.txt"
-
-        url = request_formatter.get_url_request_path(irobot_url, input_file)
-        self.assertEqual(url, "http://test/address/some/address/in/irods/file") # Note the missing extension.
-
     def test_get_file_list_with_index_for_cram(self):
         input_file = "/some/address/in/irods/file.cram"
 

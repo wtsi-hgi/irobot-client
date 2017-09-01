@@ -1,7 +1,20 @@
 """
-response_handler.py - handles specific unsuccessful iRobot responses codes to attempt the request again.
+Copyright (c) 2017 Genome Research Ltd.
 
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program. If not, see <http://www.gnu.org/licenses/>.
 """
+"""response_handler.py - handles specific unsuccessful iRobot responses codes to attempt the request again."""
 import os
 import requests
 
@@ -13,7 +26,8 @@ DEFAULT_WAIT_RESPONSE_TIME = 600
 # The useful headers expected in responses from iRobot
 response_headers = {
     'ETA': "iRobot-ETA",
-    'ACCEPTED_AUTH_TYPES': "WWW-Authenticate"
+    'ACCEPTED_AUTH_TYPES': "WWW-Authenticate",
+    'CHECKSUM': "ETag"
 }
 
 

@@ -32,7 +32,7 @@ class TestMain(unittest.TestCase):
         with open(self.test_data_dir + test_file, "rb") as file:
             self._response._content = file.read()
 
-        irobotclient.main._download_data(response=self._response, output_dir=self.output_dir)
+        irobotclient.main._download_data(response=self._response, save_location=self.output_dir)
 
         self.assertTrue(os.path.getsize(f"{self.output_dir}{test_file}") ==
                         os.path.getsize(self.test_data_dir + test_file))
@@ -46,7 +46,7 @@ class TestMain(unittest.TestCase):
         with open(self.test_data_dir + test_file, "r") as file:
             self._response._content = file.read()
 
-        irobotclient.main._download_data(response=self._response, output_dir=self.output_dir)
+        irobotclient.main._download_data(response=self._response, save_location=self.output_dir)
 
         self.assertTrue(os.path.getsize(f"{self.output_dir}{test_file}") ==
                         os.path.getsize(self.test_data_dir + test_file))
