@@ -19,7 +19,8 @@ class TestRequestFormatter(unittest.TestCase):
                                                                     basic_password=password)
 
         basic_auth = HTTPBasicAuth(username, password)
-        self.assertEqual(auth_strings, [f"Arvados {auth_token}", f"Basic {basic_auth}"])
+        self.assertEqual(auth_strings, [f"{request_formatter.authentication_types['ARVADOS']} {auth_token}",
+                                        f"{request_formatter.authentication_types['BASIC']} {basic_auth}"])
 
     # TODO - Test get_headers
 
