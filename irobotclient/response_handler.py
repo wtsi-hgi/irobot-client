@@ -76,11 +76,8 @@ def update_authentication_header(response: requests.Response, auth_credentials: 
         raise
 
     if '=' in response_auth_header_string:
-        # Get the auth types based on strings following the 'realm=' properties.
-        accepted_auth_types = re.findall(r'\w+\s+realm=', response_auth_header_string)
-        # Remove the realm keyword property
-        for index, string in enumerate(accepted_auth_types):
-            accepted_auth_types[index] = re.sub(r'realm=', '', string)
+        # Get the auth types based on strings preceding a parameter.
+        accepted_auth_types = re.findall(r'(\w+)\s+\w+=', response_auth_header_string)
     else:
         accepted_auth_types = response_auth_header_string.split(',')
 

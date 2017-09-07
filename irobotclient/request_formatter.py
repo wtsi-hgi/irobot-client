@@ -24,6 +24,11 @@ EXT_MAPPING = {
     ".bam":  (".bai", ".pbi")
 }
 
+authentication_types = {
+    'ARVADOS': "Bearer",
+    'BASIC': "Basic"
+}
+
 # A dictionary of the headers required for the request.
 request_headers = {
     'AUTHORIZATION': "Authorization",
@@ -66,11 +71,11 @@ def get_authentication_strings(arvados_token: str, basic_username: str, basic_pa
     authentication_credentials = []
 
     if arvados_token is not None:
-        authentication_credentials.append(f'Arvados {arvados_token}')
+        authentication_credentials.append(f"{authentication_types['ARVADOS']} {arvados_token}")
 
     if basic_password is not None:
         base_password = HTTPBasicAuth(basic_username, basic_password)
-        authentication_credentials.append(f'Basic {base_password}')
+        authentication_credentials.append(f"{authentication_types['BASIC']} {base_password}")
 
     return authentication_credentials
 
