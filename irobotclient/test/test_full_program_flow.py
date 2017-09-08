@@ -8,7 +8,7 @@ import requests
 
 from collections import namedtuple
 
-import irobotclient.main
+import irobotclient.entrypoint
 
 TestDataStruct = namedtuple("TestDataStruct", "full_input_url, full_output_url")
 
@@ -75,7 +75,7 @@ class TestFullProgramFlow(unittest.TestCase):
         requests.head.return_value = self._response_head
         requests.get.return_value =self._response_get
 
-        irobotclient.main._run()
+        irobotclient.entrypoint._run()
 
         self.assertTrue(os.path.exists(test_data.full_input_url) and
                         os.path.exists(self._input_file_dir + "test.crai"))

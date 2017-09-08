@@ -4,12 +4,12 @@ from unittest.mock import MagicMock
 import requests
 import os
 
-import irobotclient.main
+import irobotclient.entrypoint
 
 
 class TestMain(unittest.TestCase):
     """
-    Test case for the main.py module.
+    Test case for the entrypoint.py module.
     """
     test_data_dir = os.path.join(os.path.dirname(__file__), 'resources/testdata/')
     output_dir = os.path.join(os.path.dirname(__file__), 'resources/testdir/')
@@ -32,7 +32,7 @@ class TestMain(unittest.TestCase):
         with open(self.test_data_dir + test_file, "rb") as file:
             self._response._content = file.read()
 
-        irobotclient.main._download_data(response=self._response, save_location=self.output_dir)
+        irobotclient.entrypoint._download_data(response=self._response, save_location=self.output_dir)
 
         self.assertTrue(os.path.getsize(f"{self.output_dir}{test_file}") ==
                         os.path.getsize(self.test_data_dir + test_file))
@@ -46,7 +46,7 @@ class TestMain(unittest.TestCase):
         with open(self.test_data_dir + test_file, "r") as file:
             self._response._content = file.read()
 
-        irobotclient.main._download_data(response=self._response, save_location=self.output_dir)
+        irobotclient.entrypoint._download_data(response=self._response, save_location=self.output_dir)
 
         self.assertTrue(os.path.getsize(f"{self.output_dir}{test_file}") ==
                         os.path.getsize(self.test_data_dir + test_file))
