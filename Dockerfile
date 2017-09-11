@@ -10,4 +10,6 @@ RUN pip install -r requirements.txt
 ADD . .
 RUN python setup.py install
 
+EXPOSE 5000
+
 CMD "/bin/bash"

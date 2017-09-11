@@ -7,6 +7,8 @@ hints:
   - class: DockerRequirement
     dockerPull: mercury/irobot-client:develop
 
+  - class: InlineJavascriptRequirement
+
 inputs:
 
   - id: input_file
@@ -55,4 +57,8 @@ inputs:
       prefix: --no_index
       position: 8
 
-outputs: []  # Empty? /TODO Return downloaded file to the users local area??????
+outputs: # TODO Return downloaded file output_dir?
+  - id: output
+    type: File[]
+    outputBinding:
+      glob: "*"

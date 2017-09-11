@@ -1,0 +1,7 @@
+input_file: "/go/test.cram"
+output_dir: .    #"/irobotclient/test/resources/testdir/"
+irobot_url: "http://localhost:5000"
+arvados_token: "testtoken"
+basic_username: "testuser"
+basic_password: "testpass"
+force: true
