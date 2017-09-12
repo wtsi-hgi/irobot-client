@@ -1,13 +1,18 @@
-cwlVersion: v1.0  # Which version of cwl should I use?
-class: CommandLineTool       # Is it a cmdline tool?
+cwlVersion: v1.0
+class: CommandLineTool
 
 baseCommand: irobotclient
 
 hints:
+
   - class: DockerRequirement
-    dockerPull: mercury/irobot-client:develop
+    dockerPull: mercury/irobot-client
 
   - class: InlineJavascriptRequirement
+
+arguments:
+  - position: 2
+    valueFrom: $(runtime.outdir)
 
 inputs:
 
@@ -16,12 +21,7 @@ inputs:
     inputBinding:
       position: 1
 
-  - id: output_dir
-    type: string
-    inputBinding:
-      position: 2
-
-  - id: irobot_url  # What about env vars?
+  - id: irobot_url  # TODO - What about env vars?
     type: ["null", string]
     inputBinding:
       prefix: -u
@@ -57,7 +57,8 @@ inputs:
       prefix: --no_index
       position: 8
 
-outputs: # TODO Return downloaded file output_dir?
+outputs:
+
   - id: output
     type: File[]
     outputBinding:

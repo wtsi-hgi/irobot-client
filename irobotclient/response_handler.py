@@ -84,7 +84,7 @@ def update_authentication_header(response: requests.Response, auth_credentials: 
     for auth_type in accepted_auth_types:
         for index, auth_string in enumerate(auth_credentials):
             if auth_type.strip() in auth_string:
-                return f"{auth_type} {auth_credentials.pop(index)}"
+                return auth_credentials.pop(index)
 
     auth_credentials.clear()
     return ""

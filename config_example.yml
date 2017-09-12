@@ -1,7 +1,7 @@
-input_file: "/go/test.cram"
-output_dir: .    #"/irobotclient/test/resources/testdir/"
-irobot_url: "http://localhost:5000"
-arvados_token: "testtoken"
-basic_username: "testuser"
-basic_password: "testpass"
-force: true
+input_file: "/go/test.cram"              # A data file inside bissell
+irobot_url: "http://172.17.0.2:5000"     # The URL to a bissell container.
+arvados_token: "testtoken"               # bissel test token
+basic_username: "testuser"               # bissell test user
+basic_password: "testpass"               # bissell test password
+force: true                              # true = force overwriting
+no_index: false                          # false = download index file
