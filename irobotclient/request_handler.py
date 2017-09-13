@@ -106,7 +106,7 @@ class Requester:
                 elif 400 <= response.status_code < 600:
                     try:
                         raise IrobotClientException(response.status_code, response.json()['description'])
-                    except Exception as err:
+                    except json.JSONDecodeError:
                         raise IrobotClientException(response.status_code, response.reason)
 
             raise IrobotClientException(errno.ECONNABORTED, "ERROR: Maximum number of request retries.  This could be "
