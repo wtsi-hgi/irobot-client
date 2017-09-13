@@ -103,6 +103,7 @@ def _check_output_directory_argument(args):
 
 def _check_url_argument(args):
     # Check if a url has been provided via command line or environment setting and check trailing slash.
+    # TODO - ENHANCE - What if the input_file contains the URL?  Provide functionality for this scenario.
 
     if args.url is None:
         raise IrobotClientException(errno=errno.EINVAL, message="No iRobot URL specified; please check input "
@@ -114,6 +115,7 @@ def _check_url_argument(args):
 
 def _check_authorisation_credentials(args):
     # Check if the authorisation credentials have been set on the command line or environment variable.
+    # TODO - ENHANCE - Remove the dependency on Arvados (Bearer?) and Basic auth so it can be used for anything?
 
     if not args.arvados_token and not args.basic_password:
         raise IrobotClientException(errno=errno.EACCES, message="No Arvados or Basic authentication set; please check "

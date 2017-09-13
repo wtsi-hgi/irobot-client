@@ -21,15 +21,23 @@ cd irobot-client
 python setup.py install
 ```
 
-In a Docker container:
+Alternatively in a Docker container nut *without* test resources:
 ```
 docker run -it mercury/irobot-client
 ```
 
-- [ ] End with an example of getting some data out of the system or using it for a little demo
+Check that the iRobot-Client works:
+```
+irobotclient test_text.txt <output_directory_name> -u https://github.com/wtsi-hgi/irobot-client/tree/develop/ --arvados_token abc123 -f
+```
+
+### Usage
+- [ ] Describe CLI usage
+- [ ] Describe CWL usage
 
 ## Running the tests
-
+- [ ] Update unittests
+- [ ] Create automated test script for cwl?
 - [ ] Explain how to run the automated tests for this system
 
 ### And coding style tests
