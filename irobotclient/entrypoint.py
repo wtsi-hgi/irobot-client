@@ -78,18 +78,21 @@ def _download_data(response: Response, save_location: str) -> str:
     return hasher.hexdigest()
 
 
-def _validate_downloaded_data(response: Response, calculated_checksum: str):
+def _validate_downloaded_data(response: Response, calculated_checksum: str, log=None):
     # Check that the response checksum tag matches the file checksum.
 
     try:
         checksum = response.headers[response_headers['CHECKSUM']]
-    except KeyError:
-        raise
+    except KeyError as err:
+        print(f"WARNING: Could not obtain a checksum from the response {response_headers['CHECKSUM']} header.")
+        log.exception(err)
+        return
 
     if not calculated_checksum == checksum:
-        raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: The checksum of the downloaded file does "
-                                                                      "not match the checksum expected.  The file may "
-                                                                      "be corrupt or missing data.  Please try again.")
+        print(f"WARNING: Checksum of response and downloaded file do not match. Data may be corrupt or missing.")
+        log.exception(IrobotClientException(errno.ECONNABORTED, "ERROR: The checksum of the downloaded file does not "
+                                                                "match the checksum expected.  The file may be "
+                                                                "corrupt or missing data.  Please try again."))
 
 
 def _run(request_handler: Requester, output_dir: str, file_list: list, log=None):
@@ -108,7 +111,7 @@ def _run(request_handler: Requester, output_dir: str, file_list: list, log=None)
 
         full_file_path = output_dir + (path.split(response.url))[1]
         checksum = _download_data(response, full_file_path)
-        _validate_downloaded_data(response, checksum)
+        _validate_downloaded_data(response, checksum, log)
 
     print("Downloads complete. Exiting....")
 
@@ -128,7 +131,8 @@ def main():
         headers = request_formatter.get_headers(authentication_credentials.pop(0))
         file_list = request_formatter.get_file_list(config_details.input_file, config_details.no_index)
 
-        _run(Requester(config_details.url, headers, authentication_credentials), config_details.output_dir, file_list)
+        _run(Requester(config_details.url, headers, authentication_credentials),
+             config_details.output_dir, file_list, log)
     except IrobotClientException as err:
         _handle_error_details(err, log)
     except OSError as err:

@@ -49,7 +49,7 @@ def _get_command_line_args(args=None):
                         default=os.getenv('BASIC_PASSWORD'))
     parser.add_argument("-f", "--force", default=False, action="store_true", help="force overwrite output file if "
                                                                                   "it already exists")
-    parser.add_argument("--no_index", default=False, action="store_true", help="Do not download index files for"
+    parser.add_argument("--no_index", default=False, action="store_true", help="Do not download index files for "
                                                                                "CRAM/BAM files")
     args = parser.parse_args(args)
 

@@ -14,6 +14,8 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
+import json
+
 """request_handler.py - Requester class to make the request to iRobot and attempt to rectify any failure responses."""
 import requests
 import time
@@ -104,12 +106,12 @@ class Requester:
                 elif 400 <= response.status_code < 600:
                     try:
                         raise IrobotClientException(response.status_code, response.json()['description'])
-                    except:
-                        raise
+                    except Exception as err:
+                        raise IrobotClientException(response.status_code, response.reason)
 
-            raise IrobotClientException(errno=errno.ECONNABORTED, message="ERROR: Maximum number of request "
-                                                                          "retries.  This could be because of a large "
-                                                                          "file being fetch.  Please try again later.")
+            raise IrobotClientException(errno.ECONNABORTED, "ERROR: Maximum number of request retries.  This could be "
+                                                            "because of a large file being fetch.  Please try again "
+                                                            "later.")
 
         except ConnectionError:
             raise
