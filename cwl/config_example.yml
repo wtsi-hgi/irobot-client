@@ -1,0 +1,7 @@
+input_file: "test_text.txt"
+irobot_url: "https://github.com/wtsi-hgi/irobot-client/tree/develop"
+arvados_token: "testtoken"
+basic_username: "testuser"
+basic_password: "testpass"
+force: true                 # true = force overwriting
+no_index: false             # false = download index file
