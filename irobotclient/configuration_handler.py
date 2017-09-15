@@ -25,10 +25,10 @@ from irobotclient.custom_exceptions import IrobotClientException
 def _get_command_line_args(args=None):
     # Get program arguments from the commandline, parse them, and then return them.
 
-    parser = argparse.ArgumentParser(prog="irobot-client",
+    parser = argparse.ArgumentParser(prog="irobotclient",
                                      formatter_class=argparse.RawTextHelpFormatter,
                                      description="Command line interface for iRobot HTTP requests",
-                                     usage="irobot-client [options] INPUT_FILE OUTPUT_DIR")
+                                     usage="irobotclient [options] INPUT_FILE OUTPUT_DIR")
     parser.add_argument("input_file", help="path and name of input file")
     parser.add_argument("output_dir", help="path of output directory")
     parser.add_argument("-u", "--url",
