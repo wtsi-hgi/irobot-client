@@ -28,9 +28,10 @@ docker run -it mercury/irobot-client
 
 Check that the iRobot-Client works:
 ```
-irobotclient test_text.txt <output_directory_name> -u https://github.com/wtsi-hgi/irobot-client --arvados_token abc123 -f
+mkdir testdir
+irobotclient irobotclient/test/resources/testdata/test_text.txt testdir -u https://raw.githubusercontent.com/wtsi-hgi/irobot-client/master --arvados_token abc123 -f
 ```
-The above command should give a warning about not validating the Checksum; checksum validation is a feature supported when using the client against the iRobot server.'
+The above command should give a warning about not validating the checksum; checksum validation is a feature supported when using the client against the iRobot server.
 
 ### Usage
 ####Command line interface

@@ -8,6 +8,7 @@ setup(name='irobotclient',
       author_email='elizabeth.weatherill@sanger.ac.uk',
       license='GNU General Public License',
       packages=find_packages(exclude=["test"]),
+      install_requires=open("requirements.txt", "r").readlines(),
       entry_points={
           'console_scripts': [
               'irobotclient=irobotclient.entrypoint:main']},

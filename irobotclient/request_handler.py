@@ -107,7 +107,7 @@ class Requester:
                     try:
                         raise IrobotClientException(response.status_code, response.json()['description'])
                     except json.JSONDecodeError:
-                        raise IrobotClientException(response.status_code, response.reason)
+                        raise IrobotClientException(response.status_code, f"{response.reason}. URL: {full_url}")
 
             raise IrobotClientException(errno.ECONNABORTED, "ERROR: Maximum number of request retries.  This could be "
                                                             "because of a large file being fetch.  Please try again "
