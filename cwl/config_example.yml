@@ -1,5 +1,5 @@
 input_file: "test/resources/testdata/test_text.txt"
-irobot_url: "https://github.com/wtsi-hgi/irobot-client/tree/develop"
+irobot_url: "https://github.com/wtsi-hgi/irobot-client/"
 arvados_token: "testtoken"
 basic_username: "testuser"
 basic_password: "testpass"

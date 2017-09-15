@@ -11,7 +11,7 @@ hints:
   - class: arv:APIRequirement
 
   - class: DockerRequirement
-    dockerPull: mercury/irobot-client:develop
+    dockerPull: mercury/irobot-client
 
 arguments:
   - position: 2
