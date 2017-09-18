@@ -26,7 +26,7 @@ Alternatively in a Docker container but *without* test resources (CANNOT run the
 docker run -it mercury/irobot-client
 ```
 
-####Check that the iRobot-Client works:
+#### Check that the iRobot-Client works:
 The best way to check the client works without connecting to the irobot server is to run a docker container with the [Bissell](https://github.com/wtsi-hgi/bissell) image from [dockerhub](https://hub.docker.com/r/mercury/bissell/).
 ```
 mkdir testdir
