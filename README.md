@@ -35,7 +35,7 @@ irobotclient http://localhost:5000/test.cram testdir --arvados_token testtoken -
 The above command should download two files (`test.cram` and it's associated index file: `test.cram.crai`) to the `testdir` folder.
 
 ### Usage
-####Command line interface
+#### Command line interface
 ```
 usage: irobotclient [options] INPUT_FILE OUTPUT_DIR
 
@@ -59,8 +59,8 @@ optional arguments:
   -o, --override_url    Override a URL set in the IROBOT_URL environment 
                         variable"
 ```
-####Common Workflow Language (CWL)
- 
+
+#### Common Workflow Language (CWL)
 The below commands run the cwl wrapper passing in the example YAML file defining program argument values.
 ```
 cd cwl
