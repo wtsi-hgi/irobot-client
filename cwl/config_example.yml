@@ -1,7 +1,7 @@
-input_file: "test/resources/testdata/test_text.txt"
-irobot_url: "https://github.com/wtsi-hgi/irobot-client/"
-arvados_token: "testtoken"
-basic_username: "testuser"
-basic_password: "testpass"
-force: true                 # true = force overwriting
-no_index: false             # false = download index file
+input_file: "test.cram"                # Test file in the bissell container (Dockerhub: mercury/bissell)
+irobot_url: "http://172.17.0.2:5000"  # Default bissell address if following the dockerhub instructions
+arvados_token: "testtoken"             # Bissell test token string
+basic_username: "testuser"             # Bissell test user string
+basic_password: "testpass"             # Bissell test password string
+force: true                            # true = force overwriting
+no_index: false                        # false = download index file

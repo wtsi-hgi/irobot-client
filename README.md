@@ -26,12 +26,13 @@ Alternatively in a Docker container but *without* test resources (CANNOT run the
 docker run -it mercury/irobot-client
 ```
 
-Check that the iRobot-Client works:
+####Check that the iRobot-Client works:
+The best way to check the client works without connecting to the irobot server is to run a docker container with the [Bissell](https://github.com/wtsi-hgi/bissell) image from [dockerhub](https://hub.docker.com/r/mercury/bissell/).
 ```
 mkdir testdir
-irobotclient irobotclient/test/resources/testdata/test_text.txt testdir -u https://raw.githubusercontent.com/wtsi-hgi/irobot-client/master --arvados_token abc123 -f
+irobotclient test.cram testdir -u http://localhost:5000 --arvados_token testtoken -f
 ```
-The above command should give a warning about not validating the checksum; checksum validation is a feature supported when using the client against the iRobot server.
+The above command should download two files (`test.cram` and it's associated index file: `test.cram.crai`) to the `testdir` folder.
 
 ### Usage
 ####Command line interface
@@ -105,7 +106,7 @@ This project is licensed under the GNU General Public License - see the [LICENSE
 
 * [Chris Harrison](https://github.com/Xophmeister) - iRobot developer
 * [Colin Nolan](https://github.com/colin-nolan) - Code reviewer
-* [Josh Randall](https://github.com/jrandall) - Team lead
+* [Josh Randall](https://github.com/jrandall) - Team lead and [Bissel](https://github.com/wtsi-hgi/bissell) author
 * [Billie Thompson](https://github.com/PurpleBooth) - [README template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
 * Stack Overflow
 
