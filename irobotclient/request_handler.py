@@ -55,7 +55,7 @@ class Requester:
     get_data - handles the requesting of data.
     """
 
-    def __init__(self, requested_url: str, headers: dict, additional_auth_credentials=None):
+    def __init__(self, headers: dict, requested_url=None, additional_auth_credentials=None):
         """
         Instantiates a class object with the data require for a request attempt.
 
@@ -76,12 +76,13 @@ class Requester:
         :return: a successful iRobot response
         """
 
-        full_url = self._requested_url + file_path
+        if self._requested_url:
+            file_path = self._requested_url + file_path
 
         try:
             for index in range(REQUEST_LIMIT):
 
-                request = requests.Request(method='GET', url=full_url, headers=self._headers)
+                request = requests.Request(method='GET', url=file_path, headers=self._headers)
                 req = request.prepare()
                 session = requests.Session()
                 response = session.send(req, stream=True)
@@ -107,7 +108,7 @@ class Requester:
                     try:
                         raise IrobotClientException(response.status_code, response.json()['description'])
                     except json.JSONDecodeError:
-                        raise IrobotClientException(response.status_code, f"{response.reason}. URL: {full_url}")
+                        raise IrobotClientException(response.status_code, f"{response.reason}. URL: {file_path}")
 
             raise IrobotClientException(errno.ECONNABORTED, "ERROR: Maximum number of request retries.  This could be "
                                                             "because of a large file being fetch.  Please try again "

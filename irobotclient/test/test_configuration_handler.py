@@ -22,7 +22,8 @@ class TestConfigurationSetup(unittest.TestCase):
                                         basic_username=None,
                                         basic_password=None,
                                         force=True,
-                                        no_index=True)
+                                        no_index=True,
+                                        override_url=False)
 
         self._old_listdir = os.listdir
         os.listdir = MagicMock(spec=os.listdir)
@@ -51,11 +52,13 @@ class TestConfigurationSetup(unittest.TestCase):
                                             basic_username='tester',
                                             basic_password='test',
                                             force=True,                    # overwrite "input" in output_dir
-                                            no_index=True))                # don't download index files
+                                            no_index=True,                 # don't download index files
+                                            override_url=False))
 
     # The following test assess more granular details of the configuration handler.
     def test_input_file_slash_removal(self):
         self._args.input_file = '/input.cram'
+        self._args.url = "http://test"
         configuration_handler._check_input_file_argument(self._args)
         self.assertFalse(self._args.input_file.startswith('/'))
 
@@ -107,11 +110,6 @@ class TestConfigurationSetup(unittest.TestCase):
         self._args.force = False
         self.assertRaisesRegex(IrobotClientException, f"{errno.EEXIST}",
                                configuration_handler._check_output_directory_argument, self._args)
-
-    def test_url_as_none(self):
-
-        self.assertRaisesRegex(IrobotClientException, f"{errno.EINVAL}",
-                               configuration_handler._check_url_argument, self._args)
 
     def test_url_set_as_argument(self):
         self._args.url = "https//irobot/address/"

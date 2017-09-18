@@ -30,7 +30,7 @@ docker run -it mercury/irobot-client
 The best way to check the client works without connecting to the irobot server is to run a docker container with the [Bissell](https://github.com/wtsi-hgi/bissell) image from [dockerhub](https://hub.docker.com/r/mercury/bissell/).
 ```
 mkdir testdir
-irobotclient test.cram testdir -u http://localhost:5000 --arvados_token testtoken -f
+irobotclient http://localhost:5000/test.cram testdir --arvados_token testtoken -f
 ```
 The above command should download two files (`test.cram` and it's associated index file: `test.cram.crai`) to the `testdir` folder.
 
@@ -56,7 +56,8 @@ optional arguments:
                         Basic authentication password; if not supplied here it will be sourced from the environment {BASIC_PASSWORD}
   -f, --force           force overwrite output file if it already exists
   --no_index            Do not download index files for CRAM/BAM files
-
+  -o, --override_url    Override a URL set in the IROBOT_URL environment 
+                        variable"
 ```
 ####Common Workflow Language (CWL)
  

@@ -131,7 +131,7 @@ def main():
         headers = request_formatter.get_headers(authentication_credentials.pop(0))
         file_list = request_formatter.get_file_list(config_details.input_file, config_details.no_index)
 
-        _run(Requester(config_details.url, headers, authentication_credentials),
+        _run(Requester(headers, config_details.url, authentication_credentials),
              config_details.output_dir, file_list, log)
     except IrobotClientException as err:
         _handle_error_details(err, log)

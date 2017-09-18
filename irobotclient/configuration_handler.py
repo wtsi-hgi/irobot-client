@@ -51,6 +51,9 @@ def _get_command_line_args(args=None):
                                                                                   "it already exists")
     parser.add_argument("--no_index", default=False, action="store_true", help="Do not download index files for "
                                                                                "CRAM/BAM files")
+    parser.add_argument("-o", "--override_url", default=False, action="store_true", help="Override a URL set in the "
+                                                                                         "IROBOT_URL environment "
+                                                                                         "variable")
     args = parser.parse_args(args)
 
     return args
@@ -67,13 +70,14 @@ def _validate_command_line_args(args):
 
 def _check_input_file_argument(args):
     # Simple check to see if the input argument is a directory.
-    # Strips the leading slash from the input argument to prevent double slashes in the API request.
+    # Strips the leading slash from the input argument, if a separate URL has been specified on the commandline,
+    # to prevent double slashes in the API request.
 
     if args.input_file.endswith('/'):
         raise IrobotClientException(errno=errno.ECONNABORTED,
                                     message="Cannot download entire directories at present.")
 
-    if args.input_file.startswith('/'):
+    if args.url and args.input_file.startswith('/'):
         args.input_file = args.input_file.lstrip('/')
 
 
@@ -103,19 +107,16 @@ def _check_output_directory_argument(args):
 
 def _check_url_argument(args):
     # Check if a url has been provided via command line or environment setting and check trailing slash.
-    # TODO - ENHANCE - What if the input_file contains the URL?  Provide functionality for this scenario.
 
-    if args.url is None:
-        raise IrobotClientException(errno=errno.EINVAL, message="No iRobot URL specified; please check input "
-                                                                "arguments and/or environment variables.")
+    if args.override_url:
+        args.url = None
 
-    if not args.url.endswith('/'):
+    if args.url and not args.url.endswith('/'):
         args.url += '/'
 
 
 def _check_authorisation_credentials(args):
     # Check if the authorisation credentials have been set on the command line or environment variable.
-    # TODO - ENHANCE - Remove the dependency on Arvados (Bearer?) and Basic auth so it can be used for anything?
 
     if not args.arvados_token and not args.basic_password:
         raise IrobotClientException(errno=errno.EACCES, message="No Arvados or Basic authentication set; please check "
