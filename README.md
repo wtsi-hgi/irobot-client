@@ -34,7 +34,7 @@ irobotclient irobotclient/test/resources/testdata/test_text.txt testdir -u https
 The above command should give a warning about not validating the checksum; checksum validation is a feature supported when using the client against the iRobot server.
 
 ### Usage
-####Command line interface
+#### Command line interface
 ```
 usage: irobotclient [options] INPUT_FILE OUTPUT_DIR
 
@@ -57,8 +57,8 @@ optional arguments:
   --no_index            Do not download index files for CRAM/BAM files
 
 ```
-####Common Workflow Language (CWL)
- 
+
+#### Common Workflow Language (CWL)
 The below commands run the cwl wrapper passing in the example YAML file defining program argument values.
 ```
 cd cwl
