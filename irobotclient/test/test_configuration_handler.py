@@ -14,7 +14,7 @@ class TestConfigurationSetup(unittest.TestCase):
     Assessing if the configuration and setup of the program in undertaken correctly.
     """
     def setUp(self):
-        # A default argparse object to pass to the tested functions.
+        # A default argparse object to pass to the private functions.
         self._args = argparse.Namespace(input_file=None,
                                         output_dir=None,
                                         url=None,
