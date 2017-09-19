@@ -106,9 +106,11 @@ def _check_output_directory_argument(args):
 
 
 def _check_url_argument(args):
-    # Check if a url has been provided via command line or environment setting and check trailing slash.
+    # Check if a url has been provided via command line or environment setting and check trailing slash.  If the
+    # override_url flag is set, make sure this only cancels out the environment var, not a commandline url if it has
+    # been supplied.
 
-    if args.override_url:
+    if args.override_url and args.url == os.getenv('IROBOT_URL'):
         args.url = None
 
     if args.url and not args.url.endswith('/'):

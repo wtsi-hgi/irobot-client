@@ -107,7 +107,7 @@ This project is licensed under the GNU General Public License - see the [LICENSE
 
 * [Chris Harrison](https://github.com/Xophmeister) - iRobot developer
 * [Colin Nolan](https://github.com/colin-nolan) - Code reviewer
-* [Josh Randall](https://github.com/jrandall) - Team lead and [Bissel](https://github.com/wtsi-hgi/bissell) author
+* [Josh Randall](https://github.com/jrandall) - Team lead and [Bissell](https://github.com/wtsi-hgi/bissell) author
 * [Billie Thompson](https://github.com/PurpleBooth) - [README template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
 * Stack Overflow
 
