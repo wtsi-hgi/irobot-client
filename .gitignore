@@ -1,0 +1,11 @@
+# Project specific ignores
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+
+Project specific files
+*.log
+*.cram*
+*.crai*
+
