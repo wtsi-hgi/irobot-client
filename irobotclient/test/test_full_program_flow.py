@@ -35,7 +35,7 @@ class TestFullProgramFlow(unittest.TestCase):
         self._temp_directory.cleanup()
         return
 
-    @unittest.skip("Test CLI to be fixed")
+    # @unittest.skip("Test CLI to be fixed")
     def test_cli(self):
         """
         Test the command line interface against the bissell service.
@@ -43,14 +43,17 @@ class TestFullProgramFlow(unittest.TestCase):
         :return:
         """
         # TODO - Of course this is generating a permission denied..... subprocess isn't the same user as the TempDir expects.
-        subprocess.run([f"PYTHONPATH=. python ../entrypoint.py",  # Call the program from the test directory
+        environment = os.environ.copy()
+        environment["PYTHONPATH"] = "../../"
+        subprocess.run(["python",
+                       "../entrypoint.py",                      # Call the program from the test directory
                        f"{BISSELL_CRAM}",                       # Input file
-                       f"{self._temp_directory.name}",        # Output directory
+                       f"{self._temp_directory.name}",          # Output directory
                        f"-u {self._bissell_url}",               # URL for bissell
                        f"--arvados_token {BISSELL_TOKEN}",      # Bissel authentication token
                        f"--basic_username {BISSELL_USER}",      # Bissell basic username
                        f"--basic_password {BISSELL_PASSWORD}",  # Bissell basic password
-                       f"-f"])
+                       f"-f"], env=environment)
 
         self.assertTrue(os.path.exists(f"{self._temp_directory.name}/{BISSELL_CRAM}"))
         self.assertTrue(os.path.exists(f"{self._temp_directory.name}/{BISSELL_CRAI}"))
