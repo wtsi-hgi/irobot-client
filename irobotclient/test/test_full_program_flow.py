@@ -1,6 +1,5 @@
 import unittest
 import os
-import stat
 import tempfile
 import subprocess
 from useintest.predefined.bissell.bissell import BissellServiceController
@@ -27,7 +26,6 @@ class TestFullProgramFlow(unittest.TestCase):
 
         # Create a temporary output directory
         self._temp_directory = tempfile.TemporaryDirectory()
-        # os.chmod(f"{self._temp_directory.name}", stat.S_IRWXO)
 
     def tearDown(self):
         # Destroy bissell container
@@ -44,12 +42,13 @@ class TestFullProgramFlow(unittest.TestCase):
         """
 
         environment = os.environ.copy()
-        environment["PYTHONPATH"] = "../../"
+        if not os.getenv("PYTHONPATH"):
+            environment["PYTHONPATH"] = f"{os.path.dirname(os.path.realpath(__file__))}/../../"
         subprocess.run(["python",
-                       "../entrypoint.py",                          # Call the program from the test directory
+                       f"{os.path.dirname(os.path.realpath(__file__))}/../entrypoint.py",  # Call the program from the test directory
                        f"{BISSELL_CRAM}",                           # Input file
                        f"{self._temp_directory.name}",              # Output directory
-                       f"-u {self._bissell_url}",                   # URL for bissell
+                       f"-u", f"{self._bissell_url}",               # URL for bissell
                        f"--arvados_token", f"{BISSELL_TOKEN}",      # Bissel authentication token
                        f"--basic_username", f"{BISSELL_USER}",      # Bissell basic username
                        f"--basic_password", f"{BISSELL_PASSWORD}",  # Bissell basic password
