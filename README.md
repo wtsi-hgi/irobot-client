@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/wtsi-hgi/irobot-client.svg?branch=develop)](https://travis-ci.org/wtsi-hgi/irobot-client)
+
 # iRobot Client
 
 Basic [iRobot](https://github.com/wtsi-hgi/irobot) client to interact with the iRobot HTTP API.  The client has a [Common Workflow Language](http://www.commonwl.org/v1.0/) wrapper for integration with Arvados and other applications if needed.
