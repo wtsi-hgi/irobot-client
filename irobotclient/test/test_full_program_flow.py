@@ -1,5 +1,6 @@
 import unittest
 import os
+import stat
 import tempfile
 import subprocess
 from useintest.predefined.bissell.bissell import BissellServiceController
@@ -26,6 +27,7 @@ class TestFullProgramFlow(unittest.TestCase):
 
         # Create a temporary output directory
         self._temp_directory = tempfile.TemporaryDirectory()
+        os.chmod(f"{self._temp_directory.name}", stat.S_IRWXO)
 
     def tearDown(self):
         # Destroy bissell container
@@ -35,15 +37,15 @@ class TestFullProgramFlow(unittest.TestCase):
         self._temp_directory.cleanup()
         return
 
-    @unittest.skip("Test CLI to be fixed")
+
     def test_cli(self):
         """
         Test the command line interface against the bissell service.
 
         :return:
         """
-        # TODO - Of course this is generating a permission denied..... subprocess isn't the same user as the TempDir expects.
-        subprocess.run([f"PYTHONPATH=. python ../entrypoint.py",  # Call the program from the test directory
+
+        subprocess.run([f"../entrypoint.py",  # Call the program from the test directory
                        f"{BISSELL_CRAM}",                       # Input file
                        f"{self._temp_directory.name}",        # Output directory
                        f"-u {self._bissell_url}",               # URL for bissell
@@ -55,8 +57,7 @@ class TestFullProgramFlow(unittest.TestCase):
         self.assertTrue(os.path.exists(f"{self._temp_directory.name}/{BISSELL_CRAM}"))
         self.assertTrue(os.path.exists(f"{self._temp_directory.name}/{BISSELL_CRAI}"))
 
-
-    # Test CWL with cwl-runner against bissell.
+    # TODO - Test CWL with cwl-runner against bissell.
 
 
 if __name__ == '__main__':
