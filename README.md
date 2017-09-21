@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/wtsi-hgi/irobot-client.svg?branch=develop)](https://travis-ci.org/wtsi-hgi/irobot-client)
+[![codecov.io](https://codecov.io/gh/wtsi-hgi/irobot-client/graph/badge.svg?branch=develop)](https://codecov.io/github/wtsi-hgi/irobot-client)
+
 
 # iRobot Client
 
