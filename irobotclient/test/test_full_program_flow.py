@@ -27,7 +27,7 @@ class TestFullProgramFlow(unittest.TestCase):
 
         # Create a temporary output directory
         self._temp_directory = tempfile.TemporaryDirectory()
-        os.chmod(f"{self._temp_directory.name}", stat.S_IRWXO)
+        # os.chmod(f"{self._temp_directory.name}", stat.S_IRWXO)
 
     def tearDown(self):
         # Destroy bissell container
@@ -35,8 +35,6 @@ class TestFullProgramFlow(unittest.TestCase):
 
         # Destroy temporary test directory
         self._temp_directory.cleanup()
-        return
-
 
     def test_cli(self):
         """
@@ -45,14 +43,17 @@ class TestFullProgramFlow(unittest.TestCase):
         :return:
         """
 
-        subprocess.run([f"../entrypoint.py",  # Call the program from the test directory
-                       f"{BISSELL_CRAM}",                       # Input file
-                       f"{self._temp_directory.name}",        # Output directory
-                       f"-u {self._bissell_url}",               # URL for bissell
-                       f"--arvados_token {BISSELL_TOKEN}",      # Bissel authentication token
-                       f"--basic_username {BISSELL_USER}",      # Bissell basic username
-                       f"--basic_password {BISSELL_PASSWORD}",  # Bissell basic password
-                       f"-f"])
+        environment = os.environ.copy()
+        environment["PYTHONPATH"] = "../../"
+        subprocess.run(["python",
+                       "../entrypoint.py",                          # Call the program from the test directory
+                       f"{BISSELL_CRAM}",                           # Input file
+                       f"{self._temp_directory.name}",              # Output directory
+                       f"-u {self._bissell_url}",                   # URL for bissell
+                       f"--arvados_token", f"{BISSELL_TOKEN}",      # Bissel authentication token
+                       f"--basic_username", f"{BISSELL_USER}",      # Bissell basic username
+                       f"--basic_password", f"{BISSELL_PASSWORD}",  # Bissell basic password
+                       f"-f"], env=environment)
 
         self.assertTrue(os.path.exists(f"{self._temp_directory.name}/{BISSELL_CRAM}"))
         self.assertTrue(os.path.exists(f"{self._temp_directory.name}/{BISSELL_CRAI}"))
