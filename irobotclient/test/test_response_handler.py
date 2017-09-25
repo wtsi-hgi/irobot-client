@@ -13,7 +13,7 @@ from irobotclient.request_handler import Requester
 
 class TestResponseHandler(unittest.TestCase):
     """
-
+    Test to ensure the responses are handled appropriately.
     """
     def setUp(self):
         self._session_send = requests.Session.send
@@ -31,18 +31,16 @@ class TestResponseHandler(unittest.TestCase):
         requests.Session.send = self._session_send
         time.sleep = self._old_time_sleep
 
-    def test_202_with_eta_header(self):
+    def test_fetching_data_response_with_eta_header(self):
         self._response.status_code = 202
         future_time = datetime.now(tz=timezone.utc) + timedelta(minutes=5)
         self._response.headers['iRobot-ETA'] = future_time.strftime("%Y-%m-%dT%H:%M:%SZ+0000 +/- 123")
 
-        try:
-            self._test_requester.get_data("test/file/path")
-        except IrobotClientException:
-            self.assertEqual(response_handler.get_request_delay(self._response),
-                             int((future_time - datetime.now(tz=timezone.utc)).total_seconds()))
+        self.assertEqual(response_handler.get_request_delay(self._response),
+                         int((future_time - datetime.now(tz=timezone.utc)).total_seconds()))
 
-    def test_202_without_eta_header(self):
+    # The following test assess exception handling
+    def test_fetching_data_response_without_eta_header(self):
         self._response.status_code = 202
 
         try:

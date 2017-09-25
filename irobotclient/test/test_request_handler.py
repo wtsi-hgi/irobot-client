@@ -31,16 +31,7 @@ class TestRequester(unittest.TestCase):
         requests.Session.send = self._session_send
         time.sleep = self._old_time_sleep
 
-    def test_response_loop(self):
-        self._response.status_code = ResponseCodes['FETCHING_DATA']
-
-        self.assertRaisesRegex(IrobotClientException, f"{errno.ECONNABORTED}",
-                               self._test_requester.get_data, "test/file/path")
-
-    def test_200(self):
-        self._response.status_code = ResponseCodes['SUCCESS']
-        self.assertEqual(self._test_requester.get_data("test/file/path"), self._response)
-
+    # Tests for future functionality
     @unittest.skip("206 to be implemented")
     def test_206(self):
         self._response.status_code = ResponseCodes['RANGED_DATA']
@@ -55,6 +46,13 @@ class TestRequester(unittest.TestCase):
     def test_set_authentication_header(self):
         pass
         # TODO - Implement
+
+    # Exception Testing
+    def test_exceeded_request_retires_exception(self):
+        self._response.status_code = ResponseCodes['FETCHING_DATA']
+
+        self.assertRaisesRegex(IrobotClientException, f"{errno.ECONNABORTED}",
+                               self._test_requester.get_data, "test/file/path")
 
     def test_error_responses(self):
         self._response.status_code = ResponseCodes['NOT_FOUND']
