@@ -98,13 +98,16 @@ def _validate_downloaded_data(response: Response, calculated_checksum: str, log=
 def _run(request_handler: Requester, output_dir: str, file_list: list, log=None):
     # Call the core functionality of the program; sending the request and getting the response
 
+    all_files_downloaded = True
+
     for file in file_list:
         try:
             response = request_handler.get_data(file)
         except IrobotClientException as err:
-            if file != file_list[-1] and err.errno is ResponseCodes['NOT_FOUND']:
+            if err.errno == ResponseCodes['NOT_FOUND']:
                 log.exception(IrobotClientException)
-                print(f"WARNING: Could not find {file}. Continuing with next requested file.")
+                print(f"WARNING: Could not find {file}.")
+                all_files_downloaded = False
                 continue
             else:
                 raise
@@ -113,7 +116,10 @@ def _run(request_handler: Requester, output_dir: str, file_list: list, log=None)
         checksum = _download_data(response, full_file_path)
         _validate_downloaded_data(response, checksum, log)
 
-    print("Downloads complete. Exiting....")
+    if not all_files_downloaded:
+        print("WARNING: Not all files were downloaded.  Please check irobot_client_error.log for more details")
+
+    print("Exiting....")
 
 
 def main():

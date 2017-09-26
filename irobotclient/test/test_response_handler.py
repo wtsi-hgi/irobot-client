@@ -32,6 +32,7 @@ class TestResponseHandler(unittest.TestCase):
         time.sleep = self._old_time_sleep
 
     def test_get_delay_with_response_eta_header(self):
+        # Note: there is a slight chance this will fail if the clock ticks over during the test.
         self._response.status_code = 202   # Fetching data code
         future_time = datetime.now(tz=timezone.utc) + timedelta(minutes=5)
         self._response.headers['iRobot-ETA'] = future_time.strftime("%Y-%m-%dT%H:%M:%SZ+0000 +/- 123")
@@ -51,7 +52,6 @@ class TestResponseHandler(unittest.TestCase):
                          basic_test_string)
         self.assertEqual(response_handler.update_authentication_header(self._response, test_credentials),
                          "")
-
 
     # The following test assess exception handling
     def test_fetching_data_response_without_eta_header(self):
