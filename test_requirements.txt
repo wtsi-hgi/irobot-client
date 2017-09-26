@@ -1,2 +1,2 @@
-git+https://github.com/wtsi-hgi/useintest.git@3.1.0#egg=useintest
+git+https://github.com/wtsi-hgi/useintest.git@3.1.1#egg=useintest
 cwl-runner
