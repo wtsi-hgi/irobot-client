@@ -8,6 +8,8 @@ import socket
 import sys
 from useintest.predefined.bissell.bissell import BissellServiceController
 
+from irobotclient.custom_exceptions import IrobotClientException
+
 PROGRAM_ENTRYPOINT = f"{os.path.dirname(os.path.realpath(__file__))}/../entrypoint.py"
 BISSELL_TOKEN = "testtoken"
 BISSELL_USER = "testuser"
@@ -106,6 +108,25 @@ class TestFullProgramFlow(unittest.TestCase):
 
         self.assertTrue(os.path.exists(f"{self._temp_directory.name}/{BISSELL_CRAM}"))
         self.assertTrue(os.path.exists(f"{self._temp_directory.name}/{BISSELL_CRAI}"))
+
+    # The following tests evaluate exception handling
+    def test_authentication_fail(self):
+        """
+        This test should result in an authentication exception being raised.
+
+        :return:
+        """
+        subprocess.run(_PYTHON_EXECUTOR + [
+            PROGRAM_ENTRYPOINT,                          # Call the program from the test directory
+            f"{BISSELL_CRAM}",                           # Input file
+            f"{self._temp_directory.name}",              # Output directory
+            f"-u", f"{self._bissell_url}",               # URL for bissell
+            f"--arvados_token", f"invalid_token",        # Not a valid credential
+            f"--basic_username", f"invalid_username",    # Not a valid credential
+            f"--basic_password", f"invalid_password",    # Not a valid credential
+            f"-f"], env=self._environment)
+
+        self.assertRaisesRegex(IrobotClientException, "401")  # 401 == Authentication failed response code.
 
 
 if __name__ == '__main__':
