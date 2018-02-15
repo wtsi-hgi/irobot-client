@@ -6,7 +6,7 @@ import yaml
 import socket
 
 import sys
-from useintest.predefined.bissell.bissell import BissellServiceController
+from useintest.modules.bissell import BissellServiceController
 
 from irobotclient.custom_exceptions import IrobotClientException
 
