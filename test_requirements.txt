@@ -1,2 +1,3 @@
 useintest
 cwl-runner
+pyyaml
