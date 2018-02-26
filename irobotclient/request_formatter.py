@@ -14,6 +14,8 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 """
+from base64 import b64encode
+
 """request_formatter.py - formats the headers, URL and other necessary features of the requests."""
 import os
 from requests.auth import HTTPBasicAuth
@@ -74,8 +76,8 @@ def get_authentication_strings(arvados_token: str, basic_username: str, basic_pa
         authentication_credentials.append(f"{authentication_types['ARVADOS']} {arvados_token}")
 
     if basic_password is not None:
-        base_password = HTTPBasicAuth(basic_username, basic_password)
-        authentication_credentials.append(f"{authentication_types['BASIC']} {base_password}")
+        encoded_credentials = b64encode(f"{basic_username}:{basic_password}".encode()).decode()
+        authentication_credentials.append(f"{authentication_types['BASIC']} {encoded_credentials}")
 
     return authentication_credentials
 
