@@ -71,7 +71,7 @@ cd cwl
 pip install -r cwl_requirements.txt
 cwl-runner cwl_wrapper.cwl config_example.yml
 ```
-The above command should return a test_text.txt file to your working directory.  To specify a different output directory use the cwl-runner `--outdir OUTDIR` option.
+If the Bissell container is up and running, the above command should return a test_text.txt file to your working directory.  To specify a different output directory use the cwl-runner `--outdir OUTDIR` option.
 
 ## Deployment
 
